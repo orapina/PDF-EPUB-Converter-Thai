@@ -621,7 +621,6 @@ async function startProcess(){
   try{
   var tokenSaver=$('tscb').checked;
   var key=$('ak').value.trim(),origStart=Math.max(1,+$('sp').value||1),e0=+$('ep').value||0,tot=pdfDoc.numPages,end=(e0===0||e0>tot)?tot:e0,cw=$('cr').value;
-  var s0=(_resumeMode&&lastStopPage>0)?lastStopPage:origStart;
 
   if(!_resumeMode){
     /* ตรวจว่ามี saved progress ที่ตรง fileName มั้ย */
@@ -633,6 +632,9 @@ async function startProcess(){
       ocrS=[];tokenUsage={prompt:0,completion:0,total:0};lastStopPage=0;stats={total:end-origStart+1,textExtract:0,ocrApi:0,skipped:0};clearProgress();
     }
   }
+
+  /* คำนวณ s0 หลังจาก load progress แล้ว */
+  var s0=(_resumeMode&&lastStopPage>0)?lastStopPage:origStart;
   if(s0>end){setSt('หน้าเริ่มต้น > สิ้นสุด','err');isProc=false;return}
 
   $('bgo').disabled=true;$('bst').disabled=false;$('bres').style.display='none';$('bres').disabled=true;
