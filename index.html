@@ -6,6 +6,10 @@
 <title>Bepub — PDF to EPUB Converter (Thai)</title>
 <meta name="description" content="แปลง PDF เป็น EPUB ด้วย Typhoon OCR — รองรับภาษาไทย ทำงานในเบราว์เซอร์">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#8b5cf6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -375,6 +379,24 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
 .epub-resume .ep-info{flex:1}
 .epub-resume .ep-title{font-weight:600;font-size:.78rem}
 .epub-resume .ep-desc{font-size:.66rem;color:#a16207;margin-top:.1rem}
+
+/* ═══ Edit Modal ═══ */
+.edt-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.edt-overlay.on{display:flex}
+.edt-box{background:var(--white);border-radius:var(--r3);padding:1.25rem;width:92%;max-width:600px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 8px 30px rgba(0,0,0,.2)}
+.edt-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem}
+.edt-head h3{font-size:.88rem;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif}
+.edt-close{width:28px;height:28px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--text3)}
+.edt-close:hover{color:var(--red);border-color:var(--red)}
+.edt-ta{flex:1;width:100%;padding:.6rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:'Sarabun',sans-serif;font-size:.82rem;line-height:1.8;color:var(--text);background:var(--bg);resize:none;outline:none;min-height:200px}
+.edt-ta:focus{border-color:var(--blue)}
+.edt-foot{display:flex;gap:.3rem;margin-top:.5rem;justify-content:flex-end}
+.edt-nav{display:flex;align-items:center;gap:.4rem;margin-bottom:.4rem;justify-content:center}
+.edt-nav button{padding:.25rem .6rem;border:1px solid var(--border);background:var(--white);border-radius:var(--r);cursor:pointer;font-size:.7rem;color:var(--text2);transition:all .15s}
+.edt-nav button:hover{border-color:var(--blue);background:var(--blue-xl)}
+.edt-nav span{font-size:.68rem;color:var(--text3)}
+/* ═══ Usage Stats ═══ */
+.ustats{font-size:.6rem;color:var(--text3);text-align:center;margin-top:.3rem;padding:.3rem;background:var(--bg);border-radius:var(--r);border:1px solid var(--border)}
 </style>
 </head>
 <body>
@@ -566,9 +588,34 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
     <div class="cb pvb" id="pvb"></div>
   </div>
 
+  <!-- Edit OCR Results -->
+  <div id="editBtn" style="display:none;margin-top:.3rem">
+    <button class="btn btn-o" id="bEdit" style="width:100%;justify-content:center;gap:.3rem">✏️ แก้ไขข้อความ OCR ทีละหน้า</button>
+  </div>
+
   <div style="margin-top:.3rem">
     <div class="ct" id="lt"><span class="a">▶</span> Console Log</div>
     <div class="cb logb" id="lb"></div>
+  </div>
+
+  <!-- Usage Stats -->
+  <div class="ustats" id="ustats"></div>
+
+  <!-- Edit Modal -->
+  <div class="edt-overlay" id="edtOverlay">
+    <div class="edt-box">
+      <div class="edt-head"><h3>✏️ แก้ไขหน้า <span id="edtPageNum"></span></h3><button class="edt-close" id="edtClose">✕</button></div>
+      <div class="edt-nav">
+        <button id="edtPrev">◀ ก่อนหน้า</button>
+        <span id="edtPageInfo">1 / 1</span>
+        <button id="edtNext">ถัดไป ▶</button>
+      </div>
+      <textarea class="edt-ta" id="edtTa"></textarea>
+      <div class="edt-foot">
+        <button class="btn btn-o" id="edtCancel">ยกเลิก</button>
+        <button class="btn btn-go" id="edtSave" style="flex:none;padding:.4rem 1rem">💾 บันทึก</button>
+      </div>
+    </div>
   </div>
 
   <div class="foot">
@@ -1206,7 +1253,7 @@ async function startProcess(){
       var eb=await mke(ocrS,chaps),tb=new Blob(['\ufeff'+full],{type:'text/plain;charset=utf-8'});
       $('de').href=URL.createObjectURL(eb);$('de').download=base+'.epub';$('es').textContent=fs(eb.size);
       $('dt').href=URL.createObjectURL(tb);$('dt').download=base+'.txt';$('ts').textContent=fs(tb.size);
-      $('res').classList.add('on');$('pvsec').style.display='block';
+      $('res').classList.add('on');$('pvsec').style.display='block';$('editBtn').style.display='block';
       $('pvb').textContent=full.substring(0,5000)+(full.length>5000?'\n…(5,000 ตัวอักษรแรก)':'');
     }catch(e){log('EPUB: '+e.message,'error')}
   }
@@ -1221,6 +1268,7 @@ async function startProcess(){
     if(tokenSaver&&savedPct>0)msg+=' · 💎 ประหยัด '+savedPct+'%';
     setSt(msg,'ok');log('🎉 '+msg,'success');clearProgress();
     sendNotif('Bepub ✅',msg);
+    playSound();recordUsage(goodPages,tokenUsage.total);
   }else{
     var stopReason=isCancelled?'หยุดโดยผู้ใช้':fatalErr?(fatalErr.reason==='invalid_key'?'🔑 Key ไม่ถูกต้อง':fatalErr.reason==='quota_exceeded'?'💳 Token หมด':'🚫 Rate limit'):'Error '+consErr+' ครั้งติด';
     var msg2=stopReason+' — ได้ '+goodPages+'/'+stats.total+' หน้า'+tokStr+(hasContent?' (EPUB พร้อมดาวน์โหลด)':'');
@@ -1246,6 +1294,85 @@ async function startProcess(){
 }
 
 function fs(b){return b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB'}
+
+/* ═══ Edit OCR Modal ═══ */
+var _edtIdx=0;
+function openEditModal(idx){
+  if(!ocrS.length)return;
+  if(idx<0)idx=0;if(idx>=ocrS.length)idx=ocrS.length-1;
+  _edtIdx=idx;
+  $('edtPageNum').textContent=(idx+1);
+  $('edtTa').value=ocrS[idx]||'';
+  $('edtPageInfo').textContent=(idx+1)+' / '+ocrS.length;
+  $('edtOverlay').classList.add('on');
+  $('edtTa').focus();
+}
+function closeEditModal(){$('edtOverlay').classList.remove('on')}
+$('edtClose').onclick=closeEditModal;
+$('edtCancel').onclick=closeEditModal;
+$('edtSave').onclick=function(){
+  ocrS[_edtIdx]=$('edtTa').value;
+  if(pdfFile)saveProgress(pdfFile.name);
+  closeEditModal();
+  log('✏️ แก้ไขหน้า '+(_edtIdx+1)+' แล้ว','success');
+  setSt('✅ บันทึกการแก้ไขหน้า '+(_edtIdx+1)+' แล้ว','ok');
+};
+$('edtOverlay').onclick=function(e){if(e.target===$('edtOverlay'))closeEditModal()};
+$('edtPrev').onclick=function(){if(_edtIdx>0){ocrS[_edtIdx]=$('edtTa').value;openEditModal(_edtIdx-1)}};
+$('edtNext').onclick=function(){if(_edtIdx<ocrS.length-1){ocrS[_edtIdx]=$('edtTa').value;openEditModal(_edtIdx+1)}};
+$('bEdit').onclick=function(){if(ocrS.length)openEditModal(0)};
+
+/* ═══ Sound Notification ═══ */
+function playSound(){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='sine';o.frequency.setValueAtTime(587,ctx.currentTime);
+    g.gain.setValueAtTime(0.3,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.5);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+0.5);
+    var o2=ctx.createOscillator(),g2=ctx.createGain();
+    o2.connect(g2);g2.connect(ctx.destination);
+    o2.type='sine';o2.frequency.setValueAtTime(784,ctx.currentTime+0.15);
+    g2.gain.setValueAtTime(0.3,ctx.currentTime+0.15);
+    g2.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.65);
+    o2.start(ctx.currentTime+0.15);o2.stop(ctx.currentTime+0.65);
+  }catch(e){}
+}
+
+/* ═══ Keyboard Shortcuts ═══ */
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){
+    e.preventDefault();
+    if(!$('bgo').disabled)$('bgo').click();
+  }
+  if(e.key==='Escape'){
+    if($('edtOverlay').classList.contains('on')){closeEditModal();return}
+    if(isProc){isCancelled=true;log('🛑 หยุด (Esc)','error')}
+  }
+});
+
+/* ═══ Usage Stats (All-time) ═══ */
+var US_KEY='bepub_usage';
+function loadUsage(){try{return JSON.parse(localStorage.getItem(US_KEY))||{sessions:0,pages:0,tokens:0}}catch(e){return{sessions:0,pages:0,tokens:0}}}
+function saveUsage(u){try{localStorage.setItem(US_KEY,JSON.stringify(u))}catch(e){}}
+function updateUsageDisplay(){
+  var u=loadUsage();
+  if(u.sessions||u.pages||u.tokens){
+    $('ustats').textContent='📊 สถิติรวม: '+u.sessions+' ครั้ง · '+u.pages+' หน้า · '+u.tokens.toLocaleString()+' tokens';
+    $('ustats').style.display='block';
+  }
+}
+function recordUsage(pages,tokens){
+  var u=loadUsage();
+  u.sessions++;u.pages+=pages;u.tokens+=tokens;
+  saveUsage(u);updateUsageDisplay();
+}
+updateUsageDisplay();
+
+/* ═══ PWA Service Worker ═══ */
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}
 </script>
 </body>
 </html>

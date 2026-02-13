@@ -6,6 +6,10 @@
 <title>Bepub Translate — AI Book Translator</title>
 <meta name="description" content="แปลหนังสือ PDF/EPUB ด้วย AI — แปลภาษา EN↔TH พร้อมจัดรูปแบบสวย ออก EPUB">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#8b5cf6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -196,6 +200,41 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
 .cost-bar{display:none;margin:.4rem 0;padding:.55rem .8rem;background:var(--purple-l);border:1px solid rgba(139,92,246,.2);border-radius:var(--r);font-size:.72rem;color:var(--text2);line-height:1.5}
 .cost-bar b{color:var(--text)}
 
+/* ═══ Edit Modal ═══ */
+.edt-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.edt-overlay.on{display:flex}
+.edt-box{background:var(--white);border-radius:var(--r3);padding:1.25rem;width:92%;max-width:600px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 8px 30px rgba(0,0,0,.2)}
+.edt-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem}
+.edt-head h3{font-size:.88rem;font-weight:600;font-family:'Plus Jakarta Sans',sans-serif}
+.edt-close{width:28px;height:28px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.8rem;color:var(--text3)}
+.edt-close:hover{color:var(--red);border-color:var(--red)}
+.edt-ta{flex:1;width:100%;padding:.6rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:'Sarabun',sans-serif;font-size:.82rem;line-height:1.8;color:var(--text);background:var(--bg);resize:none;outline:none;min-height:200px}
+.edt-ta:focus{border-color:var(--purple)}
+.edt-foot{display:flex;gap:.3rem;margin-top:.5rem;justify-content:flex-end}
+
+/* ═══ Glossary ═══ */
+.gloss{margin-bottom:.6rem}
+.gloss-pairs{max-height:120px;overflow-y:auto;margin-bottom:.3rem}
+.gloss-row{display:flex;gap:.3rem;margin-bottom:.2rem;align-items:center}
+.gloss-row input{flex:1;padding:.25rem .4rem;font-size:.72rem;border:1.5px solid var(--border);border-radius:5px;font-family:inherit;background:var(--bg);color:var(--text);outline:none}
+.gloss-row input:focus{border-color:var(--purple)}
+.gloss-row .gx{cursor:pointer;color:var(--text3);font-size:.62rem;padding:.15rem .2rem;border-radius:4px}
+.gloss-row .gx:hover{color:var(--red);background:var(--red-l)}
+.gloss-arrow{font-size:.72rem;color:var(--text3)}
+
+/* ═══ EPUB Reader ═══ */
+.reader-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;align-items:center;justify-content:center}
+.reader-overlay.on{display:flex}
+.reader-box{background:var(--white);border-radius:var(--r3);width:94%;max-width:700px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.reader-head{display:flex;justify-content:space-between;align-items:center;padding:.8rem 1rem;border-bottom:1px solid var(--border)}
+.reader-head h3{font-size:.88rem;font-weight:600}
+.reader-body{flex:1;overflow-y:auto;padding:1rem 1.25rem;font-size:.84rem;line-height:1.9;color:var(--text)}
+.reader-body h1,.reader-body h2,.reader-body h3{margin:1em 0 .4em;font-family:'Plus Jakarta Sans',sans-serif}
+.reader-nav{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.6rem;border-top:1px solid var(--border)}
+
+/* ═══ Stats Total ═══ */
+.ustats{font-size:.6rem;color:var(--text3);text-align:center;margin-top:.3rem;padding:.3rem;background:var(--bg);border-radius:var(--r);border:1px solid var(--border)}
+
 /* ═══ Recovery Box ═══ */
 .recbox{display:none;margin-bottom:.6rem;padding:.85rem 1rem;background:var(--amber-l);border:1.5px solid var(--amber);border-radius:var(--r2)}
 .recbox.on{display:block}
@@ -319,6 +358,13 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
     </div>
 
     <div class="f"><label class="fl">คำสั่งเพิ่มเติม (ไม่บังคับ)</label><textarea class="fi" id="customPrompt" rows="2" placeholder="เช่น: แปลชื่อตัวละครเป็นไทย, คงศัพท์เทคนิคเป็นภาษาอังกฤษ"></textarea></div>
+
+    <!-- Glossary -->
+    <div class="gloss" id="glossSec">
+      <label class="fl">📖 คลังศัพท์ (Glossary)</label>
+      <div class="gloss-pairs" id="glossPairs"></div>
+      <button class="btn btn-o" id="bAddGloss" style="font-size:.66rem">+ เพิ่มคำศัพท์</button>
+    </div>
   </div>
 
   <!-- Card 3: Book Info -->
@@ -402,6 +448,11 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
     </div>
   </div>
 
+  <!-- EPUB Reader Button -->
+  <div id="readerBtn" style="display:none;margin-bottom:.4rem">
+    <button class="btn btn-o" id="bReader" style="width:100%;justify-content:center;gap:.3rem">📖 อ่าน EPUB ในเบราว์เซอร์</button>
+  </div>
+
   <!-- Side-by-side Preview -->
   <div class="compare" id="compareSec">
     <div class="ct" id="compareToggle"><span class="a">▶</span> เปรียบเทียบต้นฉบับ / แปลแล้ว</div>
@@ -426,6 +477,34 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
   <div style="margin-top:.3rem">
     <div class="ct" id="lt"><span class="a">▶</span> Console Log</div>
     <div class="cb logb" id="lb"></div>
+  </div>
+
+  <!-- Usage Stats -->
+  <div class="ustats" id="ustats"></div>
+
+  <!-- Edit Modal -->
+  <div class="edt-overlay" id="edtOverlay">
+    <div class="edt-box">
+      <div class="edt-head"><h3>✏️ แก้ไขหน้า <span id="edtPageNum"></span></h3><button class="edt-close" id="edtClose">✕</button></div>
+      <textarea class="edt-ta" id="edtTa"></textarea>
+      <div class="edt-foot">
+        <button class="btn btn-o" id="edtCancel">ยกเลิก</button>
+        <button class="btn btn-go" id="edtSave" style="flex:none;padding:.4rem 1rem">💾 บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EPUB Reader -->
+  <div class="reader-overlay" id="readerOverlay">
+    <div class="reader-box">
+      <div class="reader-head"><h3>📖 อ่าน EPUB</h3><button class="edt-close" id="readerClose">✕</button></div>
+      <div class="reader-body" id="readerBody"></div>
+      <div class="reader-nav">
+        <button class="btn btn-o" id="rdPrev">◀ ก่อนหน้า</button>
+        <span id="rdPage" style="font-size:.68rem;color:var(--text3)">1 / 1</span>
+        <button class="btn btn-o" id="rdNext">ถัดไป ▶</button>
+      </div>
+    </div>
   </div>
 
   <div class="foot">
@@ -718,6 +797,7 @@ async function translateChunk(text,key,style,customPrompt,prevContext){
     +'5. ใช้สรรพนาม ระดับภาษา น้ำเสียง ให้เหมาะกับบริบทของเรื่อง\n'
     +'6. ส่งผลลัพธ์เป็น markdown สะอาด ห้ามครอบด้วย ```\n';
   if(customPrompt)prompt+='7. คำสั่งเพิ่มเติม: '+customPrompt+'\n';
+  var glossPrompt=getGlossaryPrompt();if(glossPrompt)prompt+=glossPrompt;
   if(prevContext)prompt+='\n**บริบทจากส่วนก่อนหน้า (อ้างอิงเพื่อความต่อเนื่องเท่านั้น ห้ามแปลซ้ำ):**\n'+prevContext.slice(-500)+'\n';
   prompt+='\n---\n\n'+text;
 
@@ -894,6 +974,7 @@ async function startTranslate(){
         $('compareSec').classList.add('on');
         showComparePage(0);
       }
+      $('readerBtn').style.display='block';
     }catch(e){log('EPUB build: '+e.message,'error')}
   }
 
@@ -905,6 +986,7 @@ async function startTranslate(){
     var msg='✅ แปลเสร็จ! '+goodPages+' หน้า'+tokStr;
     setSt(msg,'ok');log('🎉 '+msg,'success');
     sendNotif('Bepub Translate ✅',msg);
+    playSound();recordUsage(goodPages,tokenUsage.total);
     clearTrProgress();
   }else{
     var stopReason=isCancelled?'หยุดโดยผู้ใช้':fatalErr?(fatalErr.reason==='invalid_key'?'🔑 Key ไม่ถูกต้อง':fatalErr.reason==='quota_exceeded'?'💳 Token หมด':'🚫 Rate limit'):'Error '+consErr+' ครั้งติด';
@@ -925,7 +1007,9 @@ function showComparePage(idx){
   if(idx<0)idx=0;if(idx>=maxP)idx=maxP-1;
   _cmpIdx=idx;
   $('cmpSrc').textContent=srcPages[s0+idx]||'(ว่าง)';
-  $('cmpTgt').textContent=translatedPages[idx]||'(ยังไม่แปล)';
+  var tgtText=(translatedPages[idx]||'(ยังไม่แปล)').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  $('cmpTgt').innerHTML='<div style="cursor:pointer" title="✏️ คลิกเพื่อแก้ไข">'+tgtText+'</div>';
+  $('cmpTgt').querySelector('div').onclick=function(){openEditModal(idx)};
   $('cmpPage').textContent=(idx+1)+' / '+maxP;
 }
 $('cmpPrev').onclick=function(){showComparePage(_cmpIdx-1)};
@@ -1044,6 +1128,7 @@ $('rbBuild').onclick=async function(){
     $('dt').href=URL.createObjectURL(tb);$('dt').download=base+'.txt';$('ts').textContent=fs(tb.size);
     $('res').classList.add('on');$('statbar').classList.add('on');updateStats();
     if(srcPages.length&&translatedPages.length){$('compareSec').classList.add('on');showComparePage(0)}
+    $('readerBtn').style.display='block';
     $('recBox').classList.remove('on');
     setSt('✅ กู้คืนสำเร็จ! EPUB พร้อมดาวน์โหลด','ok');
     log('🎉 กู้คืน: '+translatedPages.filter(function(s){return s&&s.trim()}).length+' หน้า','success');
@@ -1120,6 +1205,136 @@ $('rbDel').onclick=function(){
   clearTrProgress();$('recBox').classList.remove('on');
   setSt('🗑️ ลบข้อมูลค้างแล้ว','info');log('🗑️ ลบ localStorage','purple');
 };
+
+/* ═══ Glossary JS ═══ */
+var GL_KEY='bepub_glossary';
+function loadGlossary(){try{return JSON.parse(localStorage.getItem(GL_KEY))||[]}catch(e){return[]}}
+function saveGlossary(){
+  var pairs=[];
+  document.querySelectorAll('.gloss-row').forEach(function(row){
+    var ins=row.querySelectorAll('input');
+    var src=ins[0]?ins[0].value.trim():'';
+    var tgt=ins[1]?ins[1].value.trim():'';
+    if(src&&tgt)pairs.push({s:src,t:tgt});
+  });
+  localStorage.setItem(GL_KEY,JSON.stringify(pairs));
+  return pairs;
+}
+function addGlossRow(src,tgt){
+  var row=document.createElement('div');row.className='gloss-row';
+  row.innerHTML='<input placeholder="คำต้นฉบับ" value="'+(src?ex(src):'')+'"><span class="gloss-arrow">→</span><input placeholder="คำแปล" value="'+(tgt?ex(tgt):'')+'"><span class="gx">✕</span>';
+  row.querySelector('.gx').onclick=function(){row.remove();saveGlossary()};
+  row.querySelectorAll('input').forEach(function(inp){inp.onchange=function(){saveGlossary()}});
+  $('glossPairs').appendChild(row);
+}
+$('bAddGloss').onclick=function(){addGlossRow('','')};
+(function(){var gl=loadGlossary();gl.forEach(function(p){addGlossRow(p.s,p.t)})})();
+function getGlossaryPrompt(){
+  var pairs=saveGlossary();
+  if(!pairs.length)return '';
+  return '\n**คลังศัพท์ (ต้องแปลตามนี้เสมอ):**\n'+pairs.map(function(p){return '• '+p.s+' → '+p.t}).join('\n')+'\n';
+}
+
+/* ═══ Edit Text Modal JS ═══ */
+var _edtIdx=-1;
+function openEditModal(idx){
+  _edtIdx=idx;
+  $('edtPageNum').textContent=(idx+1);
+  $('edtTa').value=translatedPages[idx]||'';
+  $('edtOverlay').classList.add('on');
+  $('edtTa').focus();
+}
+function closeEditModal(){$('edtOverlay').classList.remove('on');_edtIdx=-1}
+$('edtClose').onclick=closeEditModal;
+$('edtCancel').onclick=closeEditModal;
+$('edtSave').onclick=function(){
+  if(_edtIdx<0)return;
+  translatedPages[_edtIdx]=$('edtTa').value;
+  saveTrProgress();
+  showComparePage(_edtIdx);
+  closeEditModal();
+  log('✏️ แก้ไขหน้า '+(_edtIdx+1)+' แล้ว','success');
+  setSt('✅ บันทึกการแก้ไขหน้า '+(_edtIdx+1)+' แล้ว','ok');
+};
+$('edtOverlay').onclick=function(e){if(e.target===$('edtOverlay'))closeEditModal()};
+
+/* ═══ EPUB Reader JS ═══ */
+var _rdIdx=0;
+function openReader(){
+  if(!translatedPages.length)return;
+  var pages=translatedPages.filter(function(s){return s&&s.trim()});
+  if(!pages.length)return;
+  _rdIdx=0;
+  $('readerOverlay').classList.add('on');
+  renderReaderPage(0);
+}
+function closeReader(){$('readerOverlay').classList.remove('on')}
+function renderReaderPage(idx){
+  var pages=translatedPages.filter(function(s){return s&&s.trim()});
+  if(idx<0)idx=0;if(idx>=pages.length)idx=pages.length-1;
+  _rdIdx=idx;
+  $('readerBody').innerHTML=m2h(pages[idx]);
+  $('rdPage').textContent=(idx+1)+' / '+pages.length;
+  $('readerBody').scrollTop=0;
+}
+$('bReader').onclick=openReader;
+$('readerClose').onclick=closeReader;
+$('rdPrev').onclick=function(){renderReaderPage(_rdIdx-1)};
+$('rdNext').onclick=function(){renderReaderPage(_rdIdx+1)};
+$('readerOverlay').onclick=function(e){if(e.target===$('readerOverlay'))closeReader()};
+
+/* ═══ Sound Notification ═══ */
+function playSound(){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='sine';o.frequency.setValueAtTime(587,ctx.currentTime);
+    g.gain.setValueAtTime(0.3,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.5);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+0.5);
+    var o2=ctx.createOscillator(),g2=ctx.createGain();
+    o2.connect(g2);g2.connect(ctx.destination);
+    o2.type='sine';o2.frequency.setValueAtTime(784,ctx.currentTime+0.15);
+    g2.gain.setValueAtTime(0.3,ctx.currentTime+0.15);
+    g2.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.65);
+    o2.start(ctx.currentTime+0.15);o2.stop(ctx.currentTime+0.65);
+  }catch(e){}
+}
+
+/* ═══ Keyboard Shortcuts ═══ */
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){
+    e.preventDefault();
+    if(!$('bgo').disabled)$('bgo').click();
+  }
+  if(e.key==='Escape'){
+    if($('edtOverlay').classList.contains('on')){closeEditModal();return}
+    if($('readerOverlay').classList.contains('on')){closeReader();return}
+    if(isProc){isCancelled=true;log('🛑 หยุด (Esc)','error')}
+  }
+});
+
+/* ═══ Usage Stats (All-time) ═══ */
+var US_KEY='bepub_usage';
+function loadUsage(){try{return JSON.parse(localStorage.getItem(US_KEY))||{sessions:0,pages:0,tokens:0}}catch(e){return{sessions:0,pages:0,tokens:0}}}
+function saveUsage(u){try{localStorage.setItem(US_KEY,JSON.stringify(u))}catch(e){}}
+function updateUsageDisplay(){
+  var u=loadUsage();
+  if(u.sessions||u.pages||u.tokens){
+    $('ustats').textContent='📊 สถิติรวม: '+u.sessions+' ครั้ง · '+u.pages+' หน้า · '+u.tokens.toLocaleString()+' tokens';
+    $('ustats').style.display='block';
+  }
+}
+function recordUsage(pages,tokens){
+  var u=loadUsage();
+  u.sessions++;u.pages+=pages;u.tokens+=tokens;
+  saveUsage(u);updateUsageDisplay();
+}
+updateUsageDisplay();
+
+/* ═══ PWA Service Worker ═══ */
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){})}
 </script>
 </body>
 </html>
