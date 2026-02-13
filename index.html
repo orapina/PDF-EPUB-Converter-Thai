@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bepub — PDF to EPUB Converter (Thai)</title>
+<title>CattoEPUB — PDF to EPUB Converter (Thai)</title>
 <meta name="description" content="แปลง PDF เป็น EPUB ด้วย Typhoon OCR — รองรับภาษาไทย ทำงานในเบราว์เซอร์">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📘</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#8b5cf6">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -408,7 +408,7 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
   <div class="hero-in">
     <div class="hero-title-row">
       <img src="rainflow.png" alt="rainflowData" class="hero-avatar">
-      <h1>📘 B<span>epub</span></h1>
+      <h1>� Catto<span>EPUB</span> 📘</h1>
     </div>
     <p class="hero-desc">PDF to EPUB Converter (Thai)<br>แปลง PDF เป็น EPUB ด้วย Typhoon OCR — ทำงานในเบราว์เซอร์ ไม่ต้องติดตั้ง</p>
     <div class="tags">
@@ -418,8 +418,8 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
       <span class="tag">⚡ Client-Side</span>
     </div>
     <div class="nav-pill">
-      <a href="index.html" class="active">📘 OCR Converter</a>
-      <a href="translate.html">🌐 AI Translate</a>
+      <a href="index.html" class="active">� CattoEPUB</a>
+      <a href="translate.html">🐱 CattoTranslate</a>
     </div>
     <p style="font-size:.68rem;color:var(--text3);margin-top:.75rem;line-height:1.5">💡 Based on <strong>Bepub</strong> by <a href="https://www.facebook.com/groups/ebookreader/posts/25556985560668239" target="_blank" style="color:var(--blue);text-decoration:none">Ken Takahashi</a> (<a href="https://colab.research.google.com/drive/1lgmYkuEeSUlVDLpplXCnFIQdJP9YMWjw?usp=sharing" target="_blank" style="color:var(--blue);text-decoration:none;font-size:.64rem">Colab</a>)<br>Web version by <strong style="color:var(--blue)">rainflowData</strong></p>
   </div>
@@ -790,7 +790,7 @@ $('epubFi').onchange=async function(ev){
       if(m)pages.push({idx:+m[1],path:path});
     });
     pages.sort(function(a,b){return a.idx-b.idx});
-    if(!pages.length){setSt('❌ ไม่พบหน้าใน EPUB — อาจไม่ใช่ EPUB ที่สร้างจาก Bepub','err');log('❌ ไม่พบ p*.xhtml ใน EPUB','error');return}
+    if(!pages.length){setSt('❌ ไม่พบหน้าใน EPUB — อาจไม่ใช่ EPUB ที่สร้างจาก CattoEPUB','err');log('❌ ไม่พบ p*.xhtml ใน EPUB','error');return}
     /* อ่าน text จากแต่ละหน้า */
     var restored=[];
     var maxIdx=pages[pages.length-1].idx;
@@ -1059,7 +1059,7 @@ function rtoc(){const l=$('tocl');l.innerHTML='';if(!chaps.length){$('tocsec').c
 $('bac').onclick=()=>{const p=prompt('หน้าเริ่มบท:');if(!p)return;const n=+p;if(!n||n<1)return;const t=prompt('ชื่อบท:')||`บทที่ ${chaps.length+1}`;chaps.push({title:t,pi:n-1});chaps.sort((a,b)=>a.pi-b.pi);rtoc()};
 
 async function mke(ss,ch){
-  const z=new JSZip(),m={t:$('mt').value.trim()||pdfFile.name.replace(/\.pdf$/i,''),a:$('ma').value.trim()||'Unknown',p:$('mp').value.trim(),l:$('ml').value.trim()||'th',d:$('md').value.trim()},uid='bepub-'+Date.now();
+  const z=new JSZip(),m={t:$('mt').value.trim()||pdfFile.name.replace(/\.pdf$/i,''),a:$('ma').value.trim()||'Unknown',p:$('mp').value.trim(),l:$('ml').value.trim()||'th',d:$('md').value.trim()},uid='cattoepub-'+Date.now();
   z.file('mimetype','application/epub+zip',{compression:'STORE'});
   z.file('META-INF/container.xml','<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>');
   z.file('OEBPS/style.css',`@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap');body{font-family:'Sarabun',sans-serif;line-height:1.9;padding:1.2em;color:#1a1a1a;max-width:38em;margin:0 auto}h1{font-size:1.6em;margin:1.5em 0 .5em;font-weight:600}h2{font-size:1.3em;margin:1.3em 0 .4em}h3{font-size:1.1em;margin:1.1em 0 .3em}p{margin:.4em 0;text-indent:1.5em;text-align:justify}table{border-collapse:collapse;width:100%;margin:1em 0}td,th{border:1px solid #ddd;padding:.5em .7em}blockquote{border-left:3px solid #ccc;padding-left:1em;color:#555;margin:1em 0}img.cover{max-width:100%;display:block;margin:0 auto}img.page-img{max-width:100%;display:block;margin:1em auto;border:1px solid #eee;border-radius:4px}`);
@@ -1270,14 +1270,14 @@ async function startProcess(){
     var msg='✅ สำเร็จ! '+goodPages+' หน้า'+tokStr;
     if(tokenSaver&&savedPct>0)msg+=' · 💎 ประหยัด '+savedPct+'%';
     setSt(msg,'ok');log('🎉 '+msg,'success');clearProgress();
-    sendNotif('Bepub ✅',msg);
+    sendNotif('CattoEPUB ✅',msg);
     playSound();recordUsage(goodPages,tokenUsage.total);
   }else{
     var stopReason=isCancelled?'หยุดโดยผู้ใช้':fatalErr?(fatalErr.reason==='invalid_key'?'🔑 Key ไม่ถูกต้อง':fatalErr.reason==='quota_exceeded'?'💳 Token หมด':'🚫 Rate limit'):'Error '+consErr+' ครั้งติด';
     var msg2=stopReason+' — ได้ '+goodPages+'/'+stats.total+' หน้า'+tokStr+(hasContent?' (EPUB พร้อมดาวน์โหลด)':'');
     setSt(msg2,fatalErr&&fatalErr.reason==='invalid_key'?'err':'info');
     log(msg2,fatalErr?'error':'purple');
-    sendNotif('Bepub',msg2);
+    sendNotif('CattoEPUB',msg2);
   }
 
   if(stopped&&lastStopPage>0&&lastStopPage<=end){

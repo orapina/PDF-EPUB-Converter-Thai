@@ -1,4 +1,4 @@
-const CACHE='bepub-v1';
+const CACHE='catto-v2';
 const ASSETS=[
   './',
   './index.html',

@@ -1,4 +1,4 @@
-# 📘 Bepub — PDF to EPUB Converter & AI Book Translator
+# � CattoEPUB 📘 — PDF to EPUB Converter & 🐱 CattoTranslate 🌐 — AI Book Translator
 
 แปลง PDF เป็น EPUB ด้วย Typhoon OCR / Gemini Flash + แปลหนังสือ AI (EN↔TH) — ทำงานในเบราว์เซอร์ ไม่ต้องติดตั้ง
 
@@ -16,8 +16,8 @@
 
 | หน้า | ไฟล์ | คำอธิบาย |
 |------|------|----------|
-| **📘 OCR Converter** | `index.html` | แปลง PDF → EPUB ด้วย OCR (Typhoon/Gemini) |
-| **🌐 AI Translate** | `translate.html` | แปลหนังสือ PDF/EPUB (EN↔TH) ด้วย AI |
+| **� CattoEPUB** | `index.html` | แปลง PDF → EPUB ด้วย OCR (Typhoon/Gemini) |
+| **🐱 CattoTranslate** | `translate.html` | แปลหนังสือ PDF/EPUB (EN↔TH) ด้วย AI |
 
 ---
 
@@ -31,7 +31,7 @@
 - ทำงานบน Google Colab (ต้องรัน Python)
 
 ### Web Version: by rainflowData
-**rainflowData** นำไอเดียมาสร้างเป็น **เว็บแอป** ที่ทำงานได้ในเบราว์เซอร์โดยตรง ไม่ต้องติดตั้งอะไร และเพิ่มฟีเจอร์ใหม่ๆ มากมาย รวมถึงหน้าแปลหนังสือด้วย AI
+**rainflowData** นำไอเดียมาสร้างเป็น **เว็บแอป** ที่ทำงานได้ในเบราว์เซอร์โดยตรง ไม่ต้องติดตั้งอะไร และเพิ่มฟีเจอร์ใหม่ๆ มากมาย รวมถึงหน้าแปลหนังสือด้วย AI ในชื่อ **CattoEPUB** + **CattoTranslate**
 
 ---
 
@@ -43,7 +43,7 @@
 - **Mobile Ready** — responsive ใช้งานบนมือถือได้
 - 🔒 ข้อมูลไม่ผ่านเซิร์ฟเวอร์ (ส่งเฉพาะไปยัง AI API)
 
-### 📘 OCR Converter (index.html)
+### 📘 CattoEPUB — OCR Converter (index.html)
 
 #### 💎 Token Saver Mode (ประหยัด ~85%)
 โหมดประหยัด token สำหรับไฟล์ขนาดใหญ่:
@@ -94,7 +94,7 @@
 - 📈 Usage stats รวมทุกครั้ง (sessions, pages, tokens)
 - 💰 Cost estimate ก่อนเริ่ม
 
-### 🌐 AI Translate (translate.html)
+### 🌐 CattoTranslate — AI Translate (translate.html)
 
 #### 📖 แปลหนังสือด้วย AI
 - รองรับ **PDF + EPUB** เป็น input
@@ -149,12 +149,12 @@
 2. เปิด `index.html` หรือ `translate.html` ในเบราว์เซอร์
 3. ใช้งานได้ทันที (ต้องมีเน็ตสำหรับ API เท่านั้น)
 
-### ขั้นตอน OCR Converter
+### ขั้นตอน CattoEPUB
 1. **สมัคร API Key** — [Typhoon](https://opentyphoon.ai) หรือ [Gemini](https://aistudio.google.com/apikey) (ฟรี)
 2. **อัปโหลด PDF** → เปิด Token Saver (แนะนำ)
 3. **กด "เริ่มแปลงไฟล์"** → ดาวน์โหลด EPUB + TXT
 
-### ขั้นตอน AI Translate
+### ขั้นตอน CattoTranslate
 1. **อัปโหลด PDF/EPUB** → เลือกทิศทาง EN↔TH
 2. **เลือกสไตล์** + เพิ่ม Glossary (ถ้าต้องการ)
 3. **กด "เริ่มแปล"** → อ่าน/แก้ไข/ดาวน์โหลด EPUB
@@ -180,8 +180,8 @@
 
 ```
 epub_convert/
-├── index.html        ← 📘 OCR Converter
-├── translate.html    ← 🌐 AI Book Translator
+├── index.html        ← 🐱 CattoEPUB — OCR Converter
+├── translate.html    ← 🐱 CattoTranslate — AI Book Translator
 ├── manifest.json     ← PWA manifest
 ├── sw.js             ← Service Worker (offline caching)
 ├── rainflow.png      ← Logo
@@ -204,7 +204,7 @@ epub_convert/
 | Error Handling | พื้นฐาน | ✅ Retry + Auto-stop |
 | สารบัญ | ❌ | ✅ ตรวจจับ + แก้ไขได้ |
 | Cover | ❌ | ✅ ใส่ปกได้ |
-| แปลหนังสือ | ❌ | ✅ AI Translate EN↔TH |
+| แปลหนังสือ | ❌ | ✅ CattoTranslate EN↔TH |
 | Glossary | ❌ | ✅ คลังศัพท์ |
 | EPUB Reader | ❌ | ✅ อ่านในเบราว์เซอร์ |
 | Edit Text | ❌ | ✅ แก้ไขก่อนสร้าง EPUB |

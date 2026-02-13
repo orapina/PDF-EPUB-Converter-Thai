@@ -1,6 +1,6 @@
 {
-  "name": "Bepub — PDF to EPUB Converter",
-  "short_name": "Bepub",
+  "name": "CattoEPUB — PDF to EPUB Converter",
+  "short_name": "CattoEPUB",
   "description": "แปลง PDF เป็น EPUB ด้วย AI OCR + แปลหนังสือ EN↔TH",
   "start_url": "./index.html",
   "display": "standalone",

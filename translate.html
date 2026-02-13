@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bepub Translate — AI Book Translator</title>
+<title>CattoTranslate — AI Book Translator</title>
 <meta name="description" content="แปลหนังสือ PDF/EPUB ด้วย AI — แปลภาษา EN↔TH พร้อมจัดรูปแบบสวย ออก EPUB">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌐</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#8b5cf6">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -289,7 +289,7 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
   <div class="hero-in">
     <div class="hero-title-row">
       <img src="rainflow.png" alt="rainflowData" class="hero-avatar">
-      <h1>🌐 B<span>epub</span> Translate</h1>
+      <h1>🐱 Catto<span>Translate</span> 🌐</h1>
     </div>
     <p class="hero-desc">AI Book Translator<br>แปลหนังสือ PDF/EPUB ด้วย AI — แปลภาษา EN↔TH พร้อมจัดรูปแบบสวย</p>
     <div class="tags">
@@ -299,8 +299,8 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
       <span class="tag">⚡ Client-Side</span>
     </div>
     <div class="nav-pill">
-      <a href="index.html">📘 OCR Converter</a>
-      <a href="translate.html" class="active">🌐 AI Translate</a>
+      <a href="index.html">� CattoEPUB</a>
+      <a href="translate.html" class="active">🐱 CattoTranslate</a>
     </div>
     <p style="font-size:.68rem;color:var(--text3);margin-top:.75rem;line-height:1.5">Web version by <strong style="color:var(--purple)">rainflowData</strong></p>
   </div>
@@ -508,7 +508,7 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
   </div>
 
   <div class="foot">
-    <strong>Bepub Translate</strong> by <strong style="color:var(--purple)">rainflowData</strong><br>
+    <strong>CattoTranslate</strong> by <strong style="color:var(--purple)">rainflowData</strong><br>
     Powered by <a href="https://opentyphoon.ai" target="_blank">Typhoon</a> / <a href="https://ai.google.dev" target="_blank">Gemini</a> · <a href="https://mozilla.github.io/pdf.js/" target="_blank">PDF.js</a> · <a href="https://stuk.github.io/jszip/" target="_blank">JSZip</a><br>
     <span style="font-size:.58rem;color:var(--text3)">ทำงานในเบราว์เซอร์ · ข้อมูลส่งเฉพาะ AI API · ไม่เก็บข้อมูลใดๆ</span>
     <div style="margin-top:.6rem;display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap">
@@ -985,7 +985,7 @@ async function startTranslate(){
   if(!stopped){
     var msg='✅ แปลเสร็จ! '+goodPages+' หน้า'+tokStr;
     setSt(msg,'ok');log('🎉 '+msg,'success');
-    sendNotif('Bepub Translate ✅',msg);
+    sendNotif('CattoTranslate ✅',msg);
     playSound();recordUsage(goodPages,tokenUsage.total);
     clearTrProgress();
   }else{
@@ -993,7 +993,7 @@ async function startTranslate(){
     var msg2=stopReason+' — ได้ '+goodPages+'/'+stats.total+' หน้า'+tokStr;
     setSt(msg2,fatalErr&&fatalErr.reason==='invalid_key'?'err':'info');
     log(msg2,fatalErr?'error':'purple');
-    sendNotif('Bepub Translate',msg2);
+    sendNotif('CattoTranslate',msg2);
   }
 
   $('bgo').disabled=false;$('bst').disabled=true;isProc=false;
@@ -1033,7 +1033,7 @@ function ex(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,
 async function buildEpub(pages,ch){
   var z=new JSZip();
   var m={t:$('mt').value.trim()||'Translated Book',a:$('ma').value.trim()||'Unknown',p:$('mp').value.trim(),l:$('ml').value.trim()||'th',d:$('md').value.trim()};
-  var uid='bepub-translate-'+Date.now();
+  var uid='cattotranslate-'+Date.now();
 
   z.file('mimetype','application/epub+zip',{compression:'STORE'});
   z.file('META-INF/container.xml','<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>');
@@ -1166,7 +1166,7 @@ $('rbExport').onclick=function(){
   var blob=new Blob([JSON.stringify(saved,null,2)],{type:'application/json'});
   var a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download='bepub_translate_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  a.download='cattotranslate_backup_'+new Date().toISOString().slice(0,10)+'.json';
   a.click();
   log('💾 Export สำเร็จ','success');
 };

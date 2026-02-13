@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Strip embedded page images from Bepub EPUB — keep only OCR text"""
+"""Strip embedded page images from CattoEPUB EPUB — keep only OCR text"""
 import zipfile, io, re, sys, os
 
 def strip_images(input_path, output_path=None):
