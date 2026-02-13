@@ -18,7 +18,7 @@ self.addEventListener('activate',e=>{
 
 self.addEventListener('fetch',e=>{
   /* Network-first for API calls, cache-first for static assets */
-  if(e.request.url.includes('api.opentyphoon.ai')||e.request.url.includes('generativelanguage.googleapis.com')||e.request.url.includes('hits.sh')){
+  if(e.request.url.includes('api.opentyphoon.ai')||e.request.url.includes('generativelanguage.googleapis.com')||e.request.url.includes('visitorbadge.io')){
     return;
   }
   e.respondWith(
