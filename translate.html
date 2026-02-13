@@ -154,6 +154,19 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
 .dln{font-size:.8rem;font-weight:600}
 .dls{font-size:.64rem;color:var(--text3);margin-top:.08rem}
 
+/* ═══ TOC ═══ */
+.toc{display:none;margin-bottom:.6rem}.toc.on{display:block}
+.tocl{list-style:none}
+.toci{display:flex;align-items:center;gap:.4rem;padding:.35rem .4rem;border-radius:6px;font-size:.78rem;border-bottom:1px solid var(--bg)}
+.toci:hover{background:var(--bg)}
+.toci .tn{font-size:.62rem;color:var(--text3);font-weight:700;min-width:24px}
+.toci input{flex:1;padding:.2rem .35rem;font-size:.78rem;border:1.5px solid var(--border);border-radius:5px;font-family:inherit;background:var(--white);color:var(--text);outline:none}
+.toci input:focus{border-color:var(--purple)}
+.toci .tp{font-size:.66rem;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.toci .tx{cursor:pointer;color:var(--text3);font-size:.68rem;padding:.15rem .2rem;border-radius:4px;transition:all .12s}
+.toci .tx:hover{color:var(--red);background:var(--red-l)}
+.toca{display:flex;gap:.3rem;margin-top:.4rem}
+
 /* ═══ SIDE-BY-SIDE PREVIEW ═══ */
 .compare{display:none;margin-top:.6rem}.compare.on{display:block}
 .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:.3rem;margin-top:.3rem}
@@ -346,6 +359,15 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
         <a class="dlc" id="de" href="#" download><div class="dli epub">📗</div><div><div class="dln">EPUB (แปลแล้ว)</div><div class="dls" id="es">—</div></div></a>
         <a class="dlc" id="dt" href="#" download><div class="dli txt">📝</div><div><div class="dln">TXT (ข้อความ)</div><div class="dls" id="ts">—</div></div></a>
       </div>
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc" id="tocsec">
+    <div class="card">
+      <div class="card-h"><div class="card-n">📑</div><div class="card-t">สารบัญ</div></div>
+      <ul class="tocl" id="tocl"></ul>
+      <div class="toca"><button class="btn btn-o" id="bac">+ เพิ่มบท</button><button class="btn btn-o" id="brb">🔄 สร้าง EPUB ใหม่</button></div>
     </div>
   </div>
 
@@ -543,35 +565,115 @@ async function extractPdfText(pageNum){
 $('cz').onclick=()=>$('ci').click();
 $('ci').onchange=()=>{var f=$('ci').files[0];if(!f)return;coverMime=f.type;var r=new FileReader();r.onload=e=>{coverUrl=e.target.result;$('cz').classList.add('ok');var o=$('cz').querySelector('img');if(o)o.remove();var i=document.createElement('img');i.src=coverUrl;$('cz').appendChild(i);log('ปก: '+f.name,'success')};r.readAsDataURL(f)};
 
+/* ═══ Post-processing: clean CJK garbage & artifacts ═══ */
+function cleanTranslation(text){
+  /* Remove stray CJK characters (Chinese/Japanese) mixed in Thai output */
+  var t=text;
+  /* Remove isolated Chinese/Japanese characters (keep if it's clearly a proper noun context) */
+  t=t.replace(/[\u4E00-\u9FFF\u3400-\u4DBF\u{20000}-\u{2A6DF}\u3040-\u309F\u30A0-\u30FF]+/gu,function(m){
+    /* Keep if it's inside quotes or seems intentional (very short = likely noise) */
+    return m.length<=3?'':m;
+  });
+  /* Remove markdown artifacts like triple backticks that AI sometimes adds */
+  t=t.replace(/^```[\w]*\n?/gm,'').replace(/^```$/gm,'');
+  /* Remove AI commentary lines */
+  t=t.replace(/^\*?\(?(หมายเหตุ|Note|Translation note|แปลโดย|Translated by)[^\n]*$/gim,'');
+  /* Clean excessive whitespace */
+  t=t.replace(/\n\s*\n\s*\n/g,'\n\n');
+  return t.trim();
+}
+
+/* ═══ Chapter Detection ═══ */
+function detectChapters(pages){
+  var ch=[];
+  var patterns=[
+    /^(บทที่\s*\d+[^\n]*)/m,
+    /^(ตอนที่\s*\d+[^\n]*)/m,
+    /^(Chapter\s+\d+[^\n]*)/im,
+    /^(ภาค(?:ที่)?\s*\d+[^\n]*)/m,
+    /^(Part\s+\d+[^\n]*)/im,
+    /^(บทนำ|คำนำ|สารบัญ|อารัมภบท|บทส่งท้าย|บทสรุป|ภาคผนวก|Prologue|Epilogue|Introduction|Conclusion|Preface|Foreword|Afterword)/im,
+    /^#{1,3}\s+(.+)/m
+  ];
+  pages.forEach(function(s,i){
+    if(!s||!s.trim())return;
+    for(var pi=0;pi<patterns.length;pi++){
+      var m=s.match(patterns[pi]);
+      if(m){
+        var t=m[1].replace(/^#+\s*/,'').trim();
+        if(t.length>60)t=t.slice(0,60)+'…';
+        if(t.length<2)continue;
+        if(!ch.some(function(x){return x.title===t&&Math.abs(x.pi-i)<3}))
+          ch.push({title:t,pi:i});
+        break;
+      }
+    }
+  });
+  return ch;
+}
+
+/* ═══ TOC UI ═══ */
+var chaps=[];
+function rtoc(){
+  var l=$('tocl');l.innerHTML='';
+  if(!chaps.length){$('tocsec').classList.remove('on');return}
+  $('tocsec').classList.add('on');
+  chaps.forEach(function(c,i){
+    var li=document.createElement('li');li.className='toci';
+    li.innerHTML='<span class="tn">'+(i+1)+'.</span><input value="'+ex(c.title)+'" data-i="'+i+'"><span class="tp">p.'+(c.pi+1)+'</span><span class="tx" data-i="'+i+'">✕</span>';
+    l.appendChild(li);
+  });
+  l.querySelectorAll('input').forEach(function(inp){inp.onchange=function(){chaps[+inp.dataset.i].title=inp.value}});
+  l.querySelectorAll('.tx').forEach(function(b){b.onclick=function(){chaps.splice(+b.dataset.i,1);rtoc()}});
+}
+$('bac').onclick=function(){var p=prompt('หน้าเริ่มบท:');if(!p)return;var n=+p;if(!n||n<1)return;var t=prompt('ชื่อบท:')||'บทที่ '+(chaps.length+1);chaps.push({title:t,pi:n-1});chaps.sort(function(a,b){return a.pi-b.pi});rtoc()};
+$('brb').onclick=async function(){
+  if(!translatedPages.length)return setSt('ยังไม่มีข้อมูล','err');
+  log('🔄 Rebuild...');
+  try{
+    var eb=await buildEpub(translatedPages,chaps);
+    var base=($('mt').value.trim()||'translated')+(_dir==='en2th'?' (TH)':' (EN)');
+    $('de').href=URL.createObjectURL(eb);$('de').download=base+'.epub';$('es').textContent=fs(eb.size);
+    setSt('✅ EPUB ใหม่พร้อมแล้ว','ok');log('✅ Rebuild done','success');
+  }catch(e){setSt('❌ '+e.message,'err');log(e.message,'error')}
+};
+
 /* ═══ AI Translation ═══ */
-async function translateChunk(text,key,style,customPrompt){
+async function translateChunk(text,key,style,customPrompt,prevContext){
   var provider=$('prov').value;
   var srcL=_dir==='en2th'?'English':'Thai';
   var tgtL=_dir==='en2th'?'Thai':'English';
+  var tgtLangName=_dir==='en2th'?'ภาษาไทย':'English';
   
   var styles={
-    natural:'Translate naturally and fluently. Make it sound like it was originally written in '+tgtL+'. Adapt idioms and expressions to feel natural.',
-    formal:'Translate formally and precisely. Maintain the original tone and style. Keep technical terms accurate.',
-    creative:'Translate with creative flair. Use beautiful, expressive '+tgtL+' language. Enhance the literary quality while preserving meaning.',
-    literal:'Translate as literally as possible while maintaining grammatical correctness. Stay close to the original structure.'
+    natural:'แปลอย่างธรรมชาติ ลื่นไหล อ่านสนุก เหมือนนักเขียนไทยเขียนเอง ใช้สำนวนที่คนไทยจริงๆ ใช้กัน ไม่แข็งทื่อ ไม่เป็นภาษาแปล ปรับสำนวน idiom ให้เข้ากับ'+tgtLangName,
+    formal:'แปลเป็นทางการ ใช้ภาษาสุภาพ คงน้ำเสียงและอารมณ์ของต้นฉบับ ศัพท์เทคนิคต้องถูกต้อง',
+    creative:'แปลอย่างสร้างสรรค์ ใช้ภาษาสวยงาม วรรณศิลป์ที่สะเทือนอารมณ์ เล่นคำและสัมผัสได้ แต่ยังรักษาความหมาย',
+    literal:'แปลตรงตัวที่สุด คงโครงสร้างประโยคใกล้เคียงต้นฉบับ เหมาะสำหรับเอกสารที่ต้องการความถูกต้อง'
   };
 
-  var prompt='You are a professional book translator. Translate the following text from '+srcL+' to '+tgtL+'.\n\n'
-    +'Style: '+styles[style]+'\n\n'
-    +'Rules:\n'
-    +'- Maintain formatting: headings (#, ##, ###), paragraphs, lists, tables\n'
-    +'- Keep proper nouns in their original form unless they have well-known translations\n'
-    +'- Do NOT add any notes, comments, or explanations — only output the translated text\n'
-    +'- Output in clean markdown format\n';
-  if(customPrompt)prompt+='- Additional instructions: '+customPrompt+'\n';
+  var prompt='คุณคือนักแปลหนังสืออาชีพ มีฝีมือระดับสำนักพิมพ์ชั้นนำ\n\n'
+    +'**งาน:** แปลข้อความจาก '+srcL+' เป็น '+tgtL+'\n\n'
+    +'**สไตล์:** '+styles[style]+'\n\n'
+    +'**กฎสำคัญ:**\n'
+    +'1. ห้ามมีภาษาจีน ญี่ปุ่น เกาหลี ปนเด็ดขาด — ถ้าต้นฉบับมี ให้แปลเป็น'+tgtLangName+'หรือทับศัพท์ภาษาอังกฤษ\n'
+    +'2. คงรูปแบบ markdown: หัวข้อ (#, ##, ###), ย่อหน้า, รายการ, ตาราง\n'
+    +'3. ชื่อเฉพาะ/ชื่อตัวละคร: ถ้ามีชื่อไทยที่รู้จักกันดีให้ใช้ชื่อไทย ถ้าไม่แน่ใจให้ทับศัพท์อังกฤษ\n'
+    +'4. ห้ามเพิ่มหมายเหตุ คำอธิบาย หรือความเห็นใดๆ — ส่งเฉพาะข้อความที่แปลแล้วเท่านั้น\n'
+    +'5. ใช้สรรพนาม ระดับภาษา น้ำเสียง ให้เหมาะกับบริบทของเรื่อง\n'
+    +'6. ส่งผลลัพธ์เป็น markdown สะอาด ห้ามครอบด้วย ```\n';
+  if(customPrompt)prompt+='7. คำสั่งเพิ่มเติม: '+customPrompt+'\n';
+  if(prevContext)prompt+='\n**บริบทจากส่วนก่อนหน้า (อ้างอิงเพื่อความต่อเนื่องเท่านั้น ห้ามแปลซ้ำ):**\n'+prevContext.slice(-500)+'\n';
   prompt+='\n---\n\n'+text;
 
   var maxTok=8192;
+  var temps={natural:0.4,formal:0.2,creative:0.6,literal:0.15};
+  var temp=temps[style]||0.3;
 
   if(provider==='gemini'){
     var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+key,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTok,temperature:0.3}})
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTok,temperature:temp}})
     });
     if(!r.ok){var eb='';try{eb=await r.text()}catch(x){}var err=new Error('Gemini '+r.status+(eb?': '+eb.substring(0,200):''));err.httpStatus=r.status;throw err}
     var json=await r.json();
@@ -581,7 +683,7 @@ async function translateChunk(text,key,style,customPrompt){
   }else{
     var r=await fetch('https://api.opentyphoon.ai/v1/chat/completions',{
       method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-      body:JSON.stringify({model:'typhoon-v2.5-30b-a3b-instruct',messages:[{role:'user',content:prompt}],max_tokens:maxTok,temperature:0.3})
+      body:JSON.stringify({model:'typhoon-v2.5-30b-a3b-instruct',messages:[{role:'system',content:'คุณคือนักแปลหนังสืออาชีพ ส่งเฉพาะข้อความที่แปลแล้ว ห้ามมีภาษาจีน/ญี่ปุ่น/เกาหลีปนเด็ดขาด'},{role:'user',content:prompt}],max_tokens:maxTok,temperature:temp})
     });
     if(!r.ok){var eb='';try{eb=await r.text()}catch(x){}var err=new Error('API '+r.status+(eb?': '+eb.substring(0,200):''));err.httpStatus=r.status;throw err}
     var json=await r.json();
@@ -591,9 +693,9 @@ async function translateChunk(text,key,style,customPrompt){
   }
 }
 
-async function translateRetry(text,key,style,customPrompt){
+async function translateRetry(text,key,style,customPrompt,prevContext){
   for(var a=0;a<=3;a++){
-    try{return await translateChunk(text,key,style,customPrompt)}
+    try{return await translateChunk(text,key,style,customPrompt,prevContext)}
     catch(e){
       var st=e.httpStatus||0;
       if(st===401){e.fatal=true;e.reason='invalid_key';throw e}
@@ -658,17 +760,19 @@ async function startTranslate(){
     var MAX_CHARS=3000;
     var translated='';
     try{
+      /* Context from previous page for continuity */
+      var prevCtx=(i>0&&translatedPages[i-1])?translatedPages[i-1]:''; 
       if(pageText.length<=MAX_CHARS){
         var t0=Date.now();
-        var res=await translateRetry(pageText,key,style,customPrompt);
-        translated=res.text;
+        var res=await translateRetry(pageText,key,style,customPrompt,prevCtx);
+        translated=cleanTranslation(res.text);
         tokenUsage.prompt+=(res.usage.prompt_tokens||0);
         tokenUsage.completion+=(res.usage.completion_tokens||0);
         tokenUsage.total+=(res.usage.total_tokens||0);
         var sec=((Date.now()-t0)/1000).toFixed(1);
         log('✅ หน้า '+pageNum+': '+translated.length+' chars ('+res.usage.total_tokens+' tok, '+sec+'s)','success');
       }else{
-        /* Split into paragraphs and batch */
+        /* Split into paragraphs and batch with context overlap */
         var paras=pageText.split(/\n\n+/);
         var chunks=[],cur='';
         for(var pi=0;pi<paras.length;pi++){
@@ -677,11 +781,14 @@ async function startTranslate(){
         }
         if(cur)chunks.push(cur);
         log('📄 หน้า '+pageNum+': '+chunks.length+' chunks ('+pageText.length+' chars)');
+        var chunkCtx=prevCtx;
         for(var ci=0;ci<chunks.length;ci++){
           if(isCancelled)break;
           var t0=Date.now();
-          var res=await translateRetry(chunks[ci],key,style,customPrompt);
-          translated+=(translated?'\n\n':'')+res.text;
+          var res=await translateRetry(chunks[ci],key,style,customPrompt,chunkCtx);
+          var cleanRes=cleanTranslation(res.text);
+          translated+=(translated?'\n\n':'')+cleanRes;
+          chunkCtx=cleanRes; /* pass previous chunk as context */
           tokenUsage.prompt+=(res.usage.prompt_tokens||0);
           tokenUsage.completion+=(res.usage.completion_tokens||0);
           tokenUsage.total+=(res.usage.total_tokens||0);
@@ -718,7 +825,9 @@ async function startTranslate(){
   var hasContent=full.trim().length>0;
   if(hasContent){
     try{
-      var epubBlob=await buildEpub(translatedPages);
+      chaps=detectChapters(translatedPages);
+      rtoc();
+      var epubBlob=await buildEpub(translatedPages,chaps);
       var txtBlob=new Blob(['\ufeff'+full],{type:'text/plain;charset=utf-8'});
       var base=($('mt').value.trim()||'translated')+(_dir==='en2th'?' (TH)':' (EN)');
       $('de').href=URL.createObjectURL(epubBlob);$('de').download=base+'.epub';$('es').textContent=fs(epubBlob.size);
@@ -780,7 +889,7 @@ function m2h(md){
 }
 function ex(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
-async function buildEpub(pages){
+async function buildEpub(pages,ch){
   var z=new JSZip();
   var m={t:$('mt').value.trim()||'Translated Book',a:$('ma').value.trim()||'Unknown',p:$('mp').value.trim(),l:$('ml').value.trim()||'th',d:$('md').value.trim()};
   var uid='bepub-translate-'+Date.now();
@@ -789,8 +898,9 @@ async function buildEpub(pages){
   z.file('META-INF/container.xml','<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>');
   z.file('OEBPS/style.css',"@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap');body{font-family:'Sarabun',sans-serif;line-height:1.9;padding:1.2em;color:#1a1a1a;max-width:38em;margin:0 auto}h1{font-size:1.6em;margin:1.5em 0 .5em;font-weight:600}h2{font-size:1.3em;margin:1.3em 0 .4em}h3{font-size:1.1em;margin:1.1em 0 .3em}p{margin:.4em 0;text-indent:1.5em;text-align:justify}table{border-collapse:collapse;width:100%;margin:1em 0}td,th{border:1px solid #ddd;padding:.5em .7em}blockquote{border-left:3px solid #ccc;padding-left:1em;color:#555;margin:1em 0}img.cover{max-width:100%;display:block;margin:0 auto}");
 
+  ch=ch||[];
   var mf='<item id="css" href="style.css" media-type="text/css"/>\n';
-  var sp='',nav='',po=1;
+  var sp='',nav='',po=1,pfm={};
 
   /* Cover */
   if(coverUrl){
@@ -807,12 +917,17 @@ async function buildEpub(pages){
   /* Pages */
   pages.forEach(function(s,i){
     if(!s||!s.trim())return;
-    var fn='p'+i+'.xhtml';
+    var fn='p'+i+'.xhtml';pfm[i]=fn;
     z.file('OEBPS/'+fn,'<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="'+ex(m.l)+'"><head><meta charset="UTF-8"/><link rel="stylesheet" href="style.css"/></head><body>'+m2h(s.trim())+'</body></html>');
     mf+='<item id="p'+i+'" href="'+fn+'" media-type="application/xhtml+xml"/>\n';
     sp+='<itemref idref="p'+i+'"/>\n';
-    nav+='<navPoint id="n'+i+'" playOrder="'+po+'"><navLabel><text>หน้า '+(i+1)+'</text></navLabel><content src="'+fn+'"/></navPoint>\n';po++;
   });
+  /* Chapter nav from detected chapters, or fallback to page numbers */
+  if(ch.length){
+    ch.forEach(function(c,i){var fn=pfm[c.pi]||('p'+c.pi+'.xhtml');nav+='<navPoint id="ch'+i+'" playOrder="'+po+'"><navLabel><text>'+ex(c.title)+'</text></navLabel><content src="'+fn+'"/></navPoint>\n';po++});
+  }else{
+    pages.forEach(function(s,i){if(s&&s.trim())nav+='<navPoint id="n'+i+'" playOrder="'+po+'"><navLabel><text>หน้า '+(i+1)+'</text></navLabel><content src="p'+i+'.xhtml"/></navPoint>\n';po++});
+  }
 
   var mx='<dc:title>'+ex(m.t)+'</dc:title><dc:language>'+ex(m.l)+'</dc:language><dc:identifier id="uid">'+uid+'</dc:identifier><dc:creator>'+ex(m.a)+'</dc:creator>';
   if(m.p)mx+='<dc:publisher>'+ex(m.p)+'</dc:publisher>';
