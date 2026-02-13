@@ -35,6 +35,39 @@
   --r:8px;--r2:12px;--r3:16px;
 }
 
+[data-theme="dark"]{
+  --bg:#0f172a;
+  --bg2:#1e293b;
+  --white:#1e293b;
+  --border:#334155;
+  --border2:#475569;
+  --text:#f1f5f9;
+  --text2:#94a3b8;
+  --text3:#64748b;
+  --blue:#60a5fa;
+  --blue-d:#93bbfd;
+  --blue-l:#1e3a5f;
+  --blue-xl:#172554;
+  --green:#34d399;
+  --green-l:#064e3b;
+  --red:#f87171;
+  --red-l:#7f1d1d;
+  --amber:#fbbf24;
+  --amber-l:#78350f;
+}
+[data-theme="dark"] .hero{
+  background:linear-gradient(160deg,#0f172a 0%,#1e293b 35%,#1a2744 65%,#0f172a 100%);
+  border-bottom-color:#334155;
+}
+[data-theme="dark"] .hero::before{background:radial-gradient(ellipse,rgba(96,165,250,.08) 0%,transparent 70%)}
+[data-theme="dark"] .hero::after{background:radial-gradient(ellipse,rgba(52,211,153,.06) 0%,transparent 65%)}
+[data-theme="dark"] .tag{background:var(--blue-l);color:var(--blue)}
+[data-theme="dark"] .ts-row{background:linear-gradient(135deg,#422006,#78350f);border-color:#92400e}
+[data-theme="dark"] .ts-row .ts-title{color:#fbbf24}
+[data-theme="dark"] .ts-row .ts-desc{color:#d97706}
+[data-theme="dark"] .epub-resume{background:linear-gradient(135deg,#422006,#78350f);border-color:#92400e;color:#fbbf24}
+[data-theme="dark"] .epub-resume .ep-desc{color:#d97706}
+
 html{font-size:15px;scroll-behavior:smooth}
 body{
   font-family:'Sarabun','Plus Jakarta Sans',system-ui,sans-serif;
@@ -266,6 +299,35 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
 .foot{text-align:center;padding:1.25rem 0;margin-top:1.25rem;font-size:.62rem;color:var(--text3);border-top:1px solid var(--border)}
 .foot a{color:var(--blue);text-decoration:none}.foot a:hover{text-decoration:underline}
 
+/* Dark Mode Toggle */
+.dm-btn{
+  position:fixed;top:.7rem;right:.7rem;z-index:99;width:36px;height:36px;
+  border-radius:50%;border:1px solid var(--border);background:var(--white);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:all .2s;
+}
+.dm-btn:hover{transform:scale(1.1);box-shadow:0 3px 12px rgba(0,0,0,.15)}
+
+/* Lang Toggle */
+.lang-btn{
+  position:fixed;top:.7rem;right:3rem;z-index:99;
+  padding:.3rem .6rem;border-radius:100px;border:1px solid var(--border);background:var(--white);
+  cursor:pointer;font-size:.65rem;font-weight:600;color:var(--text2);
+  box-shadow:0 2px 8px rgba(0,0,0,.1);transition:all .2s;
+}
+.lang-btn:hover{transform:scale(1.05);box-shadow:0 3px 12px rgba(0,0,0,.15)}
+
+/* PDF Preview */
+.pdf-pv{display:none;margin-top:.4rem;padding:.5rem;background:var(--bg);border:1px solid var(--border);border-radius:var(--r2);text-align:center}
+.pdf-pv.on{display:block}
+.pdf-pv canvas{max-width:100%;height:auto;border-radius:var(--r);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.pdf-pv-info{font-size:.66rem;color:var(--text3);margin-top:.3rem}
+
+/* Cost Estimate */
+.cost-bar{display:none;margin:.4rem 0;padding:.55rem .8rem;background:var(--blue-xl);border:1px solid var(--blue-l);border-radius:var(--r);font-size:.72rem;color:var(--text2);line-height:1.5}
+.cost-bar.on{display:block}
+.cost-bar b{color:var(--text)}
+
 @media(max-width:640px){
   .hero h1{font-size:1.7rem}
   .hero{padding:2rem 1rem 1.5rem}
@@ -294,9 +356,23 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
 .statbar .sb-lbl{font-size:.58rem;color:var(--text3);margin-top:.05rem}
 .btn-res{background:var(--amber);color:white;flex:1;justify-content:center;box-shadow:0 1px 4px rgba(245,158,11,.2);display:none}
 .btn-res:hover:not(:disabled){background:#d97706;box-shadow:0 2px 8px rgba(245,158,11,.25)}
+.epub-resume{
+  display:flex;align-items:center;gap:.5rem;padding:.6rem .9rem;
+  background:linear-gradient(135deg,#fef3c7,#fde68a);border:1.5px dashed var(--amber);
+  border-radius:var(--r2);cursor:pointer;margin-top:.3rem;
+  font-size:.76rem;color:#92400e;transition:all .2s;
+}
+.epub-resume:hover{background:linear-gradient(135deg,#fde68a,#fcd34d);border-color:#d97706;transform:translateY(-1px)}
+.epub-resume .ep-icon{font-size:1.3rem}
+.epub-resume .ep-info{flex:1}
+.epub-resume .ep-title{font-weight:600;font-size:.78rem}
+.epub-resume .ep-desc{font-size:.66rem;color:#a16207;margin-top:.1rem}
 </style>
 </head>
 <body>
+
+<button class="dm-btn" id="dmBtn" title="Dark/Light Mode">🌙</button>
+<button class="lang-btn" id="langBtn" title="Switch Language">EN</button>
 
 <header class="hero">
   <div class="hero-in">
@@ -332,9 +408,6 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
         <li><b>แก้ไขสารบัญ</b> — ระบบตรวจจับบท/หัวข้ออัตโนมัติ แก้ไขได้ แล้วกดสร้างใหม่</li>
         <li><b>ดาวน์โหลด</b> — ได้ EPUB + TXT พร้อมใช้บน e-reader</li>
       </ol>
-      <div class="tut-tip">
-        💡 <b>Deploy GitHub Pages:</b> สร้าง repo → อัปโหลด <code>index.html</code> ไฟล์เดียว → Settings → Pages → เลือก branch → Save!
-      </div>
     </div>
   </div>
 
@@ -348,6 +421,15 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
       <div class="uf" id="fn"></div>
     </div>
     <input type="file" id="fi" accept=".pdf" hidden>
+    <div class="pdf-pv" id="pdfPv"><canvas id="pdfPvC"></canvas><div class="pdf-pv-info" id="pdfPvI"></div></div>
+    <div class="epub-resume" id="epubResume" title="อัปโหลด EPUB เดิมเพื่อต่อจากที่ค้าง">
+      <span class="ep-icon">📕</span>
+      <div class="ep-info">
+        <div class="ep-title">อัปโหลด EPUB เดิม — ต่อจากที่ค้าง</div>
+        <div class="ep-desc">มี EPUB ที่สร้างค้างไว้? อัปโหลดแล้ว resume ต่อจากหน้าที่ยังไม่ได้แปลง</div>
+      </div>
+    </div>
+    <input type="file" id="epubFi" accept=".epub" hidden>
   </div>
 
   <!-- Token Saver -->
@@ -360,6 +442,16 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
     <div class="ts-toggle" id="tstog"></div>
   </div>
   <input type="checkbox" id="tscb" hidden>
+
+  <div class="ts-row" id="imgrow" title="ฝังรูปภาพของแต่ละหน้าใน EPUB" style="border-color:var(--border2);background:var(--white)">
+    <span class="ts-icon">🖼️</span>
+    <div class="ts-info">
+      <div class="ts-title">รวมรูปภาพจากหน้า</div>
+      <div class="ts-desc">ฝังภาพหน้า PDF ใน EPUB ด้วย — เหมาะสำหรับหนังสือที่มีภาพประกอบ (ไฟล์จะใหญ่ขึ้น)</div>
+    </div>
+    <div class="ts-toggle" id="imgtog"></div>
+  </div>
+  <input type="checkbox" id="imgcb" hidden>
 
   <!-- Step 2 -->
   <div class="card">
@@ -396,6 +488,7 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
   </div>
 
   <!-- Actions -->
+  <div class="cost-bar" id="costBar"></div>
   <div class="brow">
     <button class="btn btn-go" id="bgo" disabled>▶ เริ่มแปลงไฟล์</button>
     <button class="btn btn-res" id="bres" disabled>▶ ต่อ</button>
@@ -465,9 +558,117 @@ textarea.fi{resize:vertical;min-height:52px;line-height:1.5}
 
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-let pdfFile,pdfDoc,isCancelled=false,isProc=false,coverUrl,coverMime,ocrS=[],chaps=[];
+let pdfFile,pdfDoc,isCancelled=false,isProc=false,coverUrl,coverMime,ocrS=[],chaps=[],pageImgs=[];
 var stats={total:0,textExtract:0,ocrApi:0,skipped:0},tokenUsage={prompt:0,completion:0,total:0},lastStopPage=0;
 const $=id=>document.getElementById(id);
+
+/* ═══ i18n ═══ */
+var _lang=localStorage.getItem('bepub_lang')||'th';
+var T={
+  th:{
+    heroDesc:'PDF to EPUB Converter (Thai)<br>แปลง PDF เป็น EPUB ด้วย Typhoon OCR — ทำงานในเบราว์เซอร์ ไม่ต้องติดตั้ง',
+    howTo:'📖 วิธีใช้งาน',uploadPdf:'อัปโหลด PDF',
+    clickOrDrag:'<b>คลิกเลือกไฟล์</b> หรือลากมาวาง',pdfHint:'รองรับ .pdf — ไฟล์สแกนก็ใช้ได้',
+    epubResTitle:'อัปโหลด EPUB เดิม — ต่อจากที่ค้าง',epubResDesc:'มี EPUB ที่สร้างค้างไว้? อัปโหลดแล้ว resume ต่อจากหน้าที่ยังไม่ได้แปลง',
+    tsSaver:'Token Saver Mode',tsDesc:'ประหยัด token ~85% — ดึง text ก่อน, ข้ามหน้าว่าง, JPEG, ลดขนาด, prompt สั้น',
+    imgEmbed:'รวมรูปภาพจากหน้า',imgDesc:'ฝังภาพหน้า PDF ใน EPUB ด้วย — เหมาะสำหรับหนังสือที่มีภาพประกอบ (ไฟล์จะใหญ่ขึ้น)',
+    settings:'ตั้งค่า',startPage:'เริ่มหน้า',endPage:'สิ้นสุดหน้า',removeWords:'ลบคำเฉพาะ',
+    bookInfo:'ข้อมูลหนังสือ',startBtn:'▶ เริ่มแปลงไฟล์',stopBtn:'■ หยุด',
+    download:'ดาวน์โหลด',toc:'สารบัญ',addChapter:'+ เพิ่มบท',rebuildEpub:'🔄 สร้าง EPUB ใหม่',
+    previewText:'ดูตัวอย่างข้อความ',consoleLog:'Console Log',
+    costEst:'💰 ประเมินค่าใช้จ่าย',processing:'กำลังประมวลผล...'
+  },
+  en:{
+    heroDesc:'PDF to EPUB Converter (Thai)<br>Convert PDF to EPUB with Typhoon OCR — works in browser, no install needed',
+    howTo:'📖 How to Use',uploadPdf:'Upload PDF',
+    clickOrDrag:'<b>Click to select</b> or drag & drop',pdfHint:'Supports .pdf — scanned files work too',
+    epubResTitle:'Upload existing EPUB — Resume',epubResDesc:'Have a partial EPUB? Upload it to resume from where you left off',
+    tsSaver:'Token Saver Mode',tsDesc:'Save ~85% tokens — extract text first, skip blanks, JPEG, smaller images, shorter prompt',
+    imgEmbed:'Include Page Images',imgDesc:'Embed PDF page images in EPUB — great for illustrated books (larger file size)',
+    settings:'Settings',startPage:'Start Page',endPage:'End Page',removeWords:'Remove Words',
+    bookInfo:'Book Information',startBtn:'▶ Start Conversion',stopBtn:'■ Stop',
+    download:'Download',toc:'Table of Contents',addChapter:'+ Add Chapter',rebuildEpub:'🔄 Rebuild EPUB',
+    previewText:'Preview Text',consoleLog:'Console Log',
+    costEst:'💰 Cost Estimate',processing:'Processing...'
+  }
+};
+function applyLang(){
+  var t=T[_lang];
+  document.querySelector('.hero-desc').innerHTML=t.heroDesc;
+  document.querySelector('#tut-tog h3').textContent=t.howTo;
+  var cards=document.querySelectorAll('.card-t');
+  if(cards[0])cards[0].textContent=t.uploadPdf;
+  if(cards[1])cards[1].textContent=t.settings;
+  if(cards[2])cards[2].textContent=t.bookInfo;
+  document.querySelector('.ut').innerHTML=t.clickOrDrag;
+  document.querySelector('.uh').textContent=t.pdfHint;
+  document.querySelector('.ep-title').textContent=t.epubResTitle;
+  document.querySelector('.ep-desc').textContent=t.epubResDesc;
+  document.querySelector('#tsrow .ts-title').textContent=t.tsSaver;
+  document.querySelector('#tsrow .ts-desc').textContent=t.tsDesc;
+  document.querySelector('#imgrow .ts-title').textContent=t.imgEmbed;
+  document.querySelector('#imgrow .ts-desc').textContent=t.imgDesc;
+  $('bgo').textContent=t.startBtn;$('bst').textContent=t.stopBtn;
+  $('bac').textContent=t.addChapter;$('brb').textContent=t.rebuildEpub;
+  var dlCard=document.querySelector('#res .card-t');if(dlCard)dlCard.textContent=t.download;
+  var tocCard=document.querySelector('#tocsec .card-t');if(tocCard)tocCard.textContent=t.toc;
+  $('langBtn').textContent=_lang==='th'?'EN':'TH';
+}
+
+/* ═══ Dark Mode ═══ */
+var _dark=localStorage.getItem('bepub_dark')==='1';
+function applyDark(){
+  document.documentElement.setAttribute('data-theme',_dark?'dark':'');
+  $('dmBtn').textContent=_dark?'☀️':'🌙';
+  localStorage.setItem('bepub_dark',_dark?'1':'0');
+}
+$('dmBtn').onclick=function(){_dark=!_dark;applyDark()};
+applyDark();
+
+/* ═══ Language Toggle ═══ */
+$('langBtn').onclick=function(){_lang=_lang==='th'?'en':'th';localStorage.setItem('bepub_lang',_lang);applyLang()};
+
+/* ═══ Remember API Key ═══ */
+var savedKey=localStorage.getItem('bepub_apikey')||'';
+var savedProv=localStorage.getItem('bepub_prov')||'typhoon';
+if(savedKey){$('ak').value=savedKey}
+if(savedProv){$('prov').value=savedProv;if(savedProv==='gemini'){$('ak-lbl').textContent='Gemini API Key';$('ak').placeholder='AIzaSy...'}}
+applyLang();
+
+/* ═══ Cost Estimate ═══ */
+function updateCost(){
+  if(!pdfDoc){$('costBar').style.display='none';return}
+  var pages=pdfDoc.numPages,ts=$('tscb').checked,prov=$('prov').value;
+  var s0=Math.max(1,+$('sp').value||1),e0=+$('ep').value||0;
+  var end=(e0===0||e0>pages)?pages:e0;
+  var numPages=end-s0+1;if(numPages<1)numPages=pages;
+  var tokPerPage=ts?1500:4000,totalTok=numPages*tokPerPage;
+  var cost;
+  if(prov==='gemini'){cost='ฟรี (Gemini Flash free tier)'}
+  else{var usd=(totalTok/1000*0.003).toFixed(2);cost='~$'+usd+' USD (~'+Math.round(totalTok/1000)+'K tokens)'}
+  $('costBar').innerHTML='💰 '+(_lang==='en'?'Estimate':'ประมาณ')+': <b>'+cost+'</b> · '+numPages+' '+(_lang==='en'?'pages':'หน้า')+(ts?' (Token Saver)':'');
+  $('costBar').style.display='block';
+}
+
+/* ═══ PDF Preview Thumbnail ═══ */
+async function showPdfPreview(){
+  if(!pdfDoc)return;
+  try{
+    var pg1=await pdfDoc.getPage(1),vp1=pg1.getViewport({scale:1});
+    var sc=180/Math.max(vp1.width,vp1.height),vp2=pg1.getViewport({scale:sc});
+    var pvC=$('pdfPvC');pvC.width=vp2.width;pvC.height=vp2.height;
+    await pg1.render({canvasContext:pvC.getContext('2d'),viewport:vp2}).promise;
+    $('pdfPvI').textContent=pdfDoc.numPages+' '+(_lang==='en'?'pages':'หน้า');
+    $('pdfPv').style.display='flex';
+  }catch(e){}
+}
+
+/* ═══ Notification helper ═══ */
+function sendNotif(title,body){
+  if(!('Notification' in window))return;
+  if(Notification.permission==='granted'){new Notification(title,{body:body,icon:'rainflow.png'})}
+  else if(Notification.permission!=='denied'){Notification.requestPermission().then(function(p){if(p==='granted')new Notification(title,{body:body,icon:'rainflow.png'})})}
+}
 
 $('tut-tog').onclick=()=>$('tut').classList.toggle('open');
 document.querySelectorAll('.ct').forEach(e=>e.onclick=function(){this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')});
@@ -486,6 +687,138 @@ function loadProgress(){
 }
 function clearProgress(){try{localStorage.removeItem(LS_KEY)}catch(e){}}
 
+/* === EPUB Resume Upload === */
+$('epubResume').onclick=function(){$('epubFi').click()};
+/* Drag & Drop EPUB */
+$('epubResume').ondragover=function(e){e.preventDefault();this.style.borderColor='var(--a)';this.style.opacity='1'};
+$('epubResume').ondragleave=function(){this.style.borderColor='';this.style.opacity=''};
+$('epubResume').ondrop=function(e){
+  e.preventDefault();this.style.borderColor='';this.style.opacity='';
+  var f=e.dataTransfer.files[0];
+  if(f&&f.name.toLowerCase().endsWith('.epub')){
+    var dt=new DataTransfer();dt.items.add(f);$('epubFi').files=dt.files;
+    $('epubFi').dispatchEvent(new Event('change'));
+  }
+};
+$('epubFi').onchange=async function(ev){
+  var file=ev.target.files[0];if(!file)return;
+  try{
+    setSt('📕 กำลังอ่าน EPUB...','info');
+    log('📕 อ่าน EPUB: '+file.name);
+    var buf=await file.arrayBuffer();
+    var zip=await JSZip.loadAsync(buf);
+    /* หาไฟล์ p0.xhtml, p1.xhtml, ... เรียงตามหมายเลข */
+    var pages=[];
+    zip.forEach(function(path,entry){
+      var m=path.match(/p(\d+)\.xhtml$/);
+      if(m)pages.push({idx:+m[1],path:path});
+    });
+    pages.sort(function(a,b){return a.idx-b.idx});
+    if(!pages.length){setSt('❌ ไม่พบหน้าใน EPUB — อาจไม่ใช่ EPUB ที่สร้างจาก Bepub','err');log('❌ ไม่พบ p*.xhtml ใน EPUB','error');return}
+    /* อ่าน text จากแต่ละหน้า */
+    var restored=[];
+    var maxIdx=pages[pages.length-1].idx;
+    for(var i=0;i<=maxIdx;i++)restored.push('');
+    for(var pi=0;pi<pages.length;pi++){
+      var xhtml=await zip.file(pages[pi].path).async('string');
+      /* ดึง text จาก <body>...</body> */
+      var bodyM=xhtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+      if(bodyM){
+        var html=bodyM[1];
+        /* แปลง HTML กลับเป็น markdown-like text */
+        var txt=html
+          .replace(/<h1[^>]*>(.*?)<\/h1>/gi,'# $1\n')
+          .replace(/<h2[^>]*>(.*?)<\/h2>/gi,'## $1\n')
+          .replace(/<h3[^>]*>(.*?)<\/h3>/gi,'### $1\n')
+          .replace(/<strong>(.*?)<\/strong>/gi,'**$1**')
+          .replace(/<em>(.*?)<\/em>/gi,'*$1*')
+          .replace(/<li>(.*?)<\/li>/gi,'- $1\n')
+          .replace(/<br\s*\/?>/gi,'\n')
+          .replace(/<p[^>]*>(.*?)<\/p>/gi,'$1\n\n')
+          .replace(/<\/?[^>]+>/g,'')
+          .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"')
+          .replace(/\n{3,}/g,'\n\n').trim();
+        restored[pages[pi].idx]=txt;
+      }
+    }
+    /* เซ็ตค่า */
+    ocrS=restored;
+    var goodCount=ocrS.filter(function(s){return s&&s.trim()}).length;
+    lastStopPage=maxIdx+2; /* หน้าถัดไปคือ maxIdx+2 (เพราะ idx 0-based, page 1-based) */
+    stats={total:0,textExtract:0,ocrApi:goodCount,skipped:maxIdx+1-goodCount};
+    tokenUsage={prompt:0,completion:0,total:0};
+    chaps=dch(ocrS);
+    _resumeMode=true;
+
+    /* ดึง metadata จาก content.opf */
+    try{
+      var opfFile=zip.file('OEBPS/content.opf');
+      if(opfFile){
+        var opfXml=await opfFile.async('string');
+        log('📋 อ่าน content.opf สำเร็จ');
+        var gm=function(tag){var m=opfXml.match(new RegExp('<dc:'+tag+'[^>]*>([\\s\\S]*?)</dc:'+tag+'>','i'));return m?m[1].replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').trim():''};
+        var mt=gm('title'),ma=gm('creator'),mp=gm('publisher'),ml=gm('language'),md=gm('description');
+        if(mt){$('mt').value=mt;log('📖 Title: '+mt)}
+        if(ma&&ma!=='Unknown'){$('ma').value=ma;log('✍️ Author: '+ma)}
+        if(mp)$('mp').value=mp;
+        if(ml)$('ml').value=ml;
+        if(md)$('md').value=md;
+      }else{log('⚠️ ไม่พบ content.opf','purple')}
+    }catch(me){log('⚠️ อ่าน metadata ไม่ได้: '+me.message,'error')}
+
+    /* ดึงปกหนังสือ */
+    try{
+      var coverFound=false;
+      /* วิธีที่ 1: หาจาก OEBPS/cover.* */
+      var coverExts=['jpg','jpeg','png','webp'];
+      for(var ci=0;ci<coverExts.length&&!coverFound;ci++){
+        var cf=zip.file('OEBPS/cover.'+coverExts[ci]);
+        if(cf){
+          var cData=await cf.async('base64');
+          var cMime=coverExts[ci]==='png'?'image/png':'image/jpeg';
+          coverUrl='data:'+cMime+';base64,'+cData;coverMime=cMime;coverFound=true;
+        }
+      }
+      /* วิธีที่ 2: หาไฟล์รูปที่มี "cover" ในชื่อ */
+      if(!coverFound){
+        zip.forEach(function(path,entry){
+          if(coverFound)return;
+          if(path.match(/cover\.(jpg|jpeg|png|webp)$/i)){
+            coverFound=true;
+            entry.async('base64').then(function(d){
+              var ext=path.split('.').pop().toLowerCase();
+              var mime=ext==='png'?'image/png':'image/jpeg';
+              coverUrl='data:'+mime+';base64,'+d;coverMime=mime;
+              $('cz').classList.add('ok');
+              var oi=$('cz').querySelector('img');if(oi)oi.remove();
+              var ni=document.createElement('img');ni.src=coverUrl;$('cz').appendChild(ni);
+              log('🖼️ ปกจาก EPUB','success');
+            });
+          }
+        });
+      }
+      if(coverFound&&coverUrl){
+        $('cz').classList.add('ok');
+        var oldImg=$('cz').querySelector('img');if(oldImg)oldImg.remove();
+        var newImg=document.createElement('img');newImg.src=coverUrl;$('cz').appendChild(newImg);
+        log('🖼️ ปกหนังสือจาก EPUB','success');
+      }else{log('ℹ️ EPUB ไม่มีปกหนังสือ','purple')}
+    }catch(ce){log('⚠️ อ่านปกไม่ได้: '+ce.message,'error')}
+    /* แสดงผล */
+    $('statbar').classList.add('on');
+    updateStats();
+    setSt('📕 โหลดจาก EPUB: '+goodCount+' หน้า — อัปโหลด PDF เดิมแล้วกด Resume เพื่อต่อจากหน้า '+lastStopPage,'ok');
+    log('✅ โหลด '+goodCount+' หน้าจาก EPUB สำเร็จ — ต่อจากหน้า '+lastStopPage,'success');
+    /* แสดงปุ่ม Resume */
+    $('bres').style.display='';$('bres').disabled=false;
+    $('bres').textContent='▶ ต่อจากหน้า '+lastStopPage;
+  }catch(e){
+    setSt('❌ อ่าน EPUB ไม่สำเร็จ: '+e.message,'err');
+    log('❌ EPUB read error: '+e.message,'error');
+  }
+  ev.target.value='';
+};
+
 /* ตรวจ saved progress ตอนโหลดหน้า */
 (function(){
   var saved=loadProgress();
@@ -499,6 +832,7 @@ function clearProgress(){try{localStorage.removeItem(LS_KEY)}catch(e){}}
 })();
 
 $('tsrow').onclick=function(){var cb=$('tscb'),tog=$('tstog');cb.checked=!cb.checked;if(cb.checked)tog.classList.add('on');else tog.classList.remove('on')};
+$('imgrow').onclick=function(){var cb=$('imgcb'),tog=$('imgtog');cb.checked=!cb.checked;if(cb.checked)tog.classList.add('on');else tog.classList.remove('on')};
 
 const dz=$('dz'),fi=$('fi');
 dz.onclick=()=>fi.click();
@@ -511,27 +845,49 @@ async function hf(f){
   if(!f.name.toLowerCase().endsWith('.pdf'))return setSt('เลือกไฟล์ PDF เท่านั้น','err');
   pdfFile=f;dz.classList.add('ok');
   $('fn').textContent=`${f.name} (${fs(f.size)})`;
-  $('mt').placeholder=f.name.replace(/\.pdf$/i,'');
   log('โหลด: '+f.name);
-  try{pdfDoc=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;log(`PDF ${pdfDoc.numPages} หน้า`,'success');ck()}
+  try{
+    pdfDoc=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;
+    log(`PDF ${pdfDoc.numPages} หน้า`,'success');
+    showPdfPreview();updateCost();
+    /* ดึง metadata จาก PDF */
+    try{
+      var meta=await pdfDoc.getMetadata();
+      var info=meta&&meta.info?meta.info:{};
+      if(info.Title&&info.Title.trim()){$('mt').value=info.Title.trim();log('📖 Title: '+info.Title.trim())}
+      else{$('mt').placeholder=f.name.replace(/\.pdf$/i,'')}
+      if(info.Author&&info.Author.trim()){$('ma').value=info.Author.trim();log('✍️ Author: '+info.Author.trim())}
+      if(info.Producer&&info.Producer.trim()&&!info.Producer.match(/^(Adobe|Microsoft|LibreOffice|macOS|Chrome|Firefox)/i)){$('mp').value=info.Producer.trim()}
+      if(info.Subject&&info.Subject.trim()){$('md').value=info.Subject.trim()}
+    }catch(me){}
+    ck();
+  }
   catch(e){log('อ่านไม่ได้: '+e.message,'error');setSt('อ่าน PDF ไม่ได้','err')}
 }
 
 $('cz').onclick=()=>$('ci').click();
 $('ci').onchange=()=>{const f=$('ci').files[0];if(!f)return;coverMime=f.type;const r=new FileReader();r.onload=e=>{coverUrl=e.target.result;$('cz').classList.add('ok');const o=$('cz').querySelector('img');if(o)o.remove();const i=document.createElement('img');i.src=coverUrl;$('cz').appendChild(i);log('ปก: '+f.name,'success')};r.readAsDataURL(f)};
 
-function ck(){$('bgo').disabled=!(pdfDoc&&$('ak').value.trim())}
-$('ak').oninput=ck;
+function cleanKey(k){return k.replace(/[^\x20-\x7E]/g,'').trim()}
+function ck(){$('bgo').disabled=!(pdfDoc&&$('ak').value.trim());updateCost()}
+$('ak').oninput=function(){this.value=cleanKey(this.value);ck();localStorage.setItem('bepub_apikey',this.value)};
+$('ak').onpaste=function(){var self=this;setTimeout(function(){self.value=cleanKey(self.value);ck();localStorage.setItem('bepub_apikey',self.value)},0)};
 $('prov').onchange=function(){
   var v=this.value;
+  localStorage.setItem('bepub_prov',v);
   if(v==='gemini'){$('ak-lbl').textContent='Gemini API Key';$('ak').placeholder='AIzaSy...'}
   else{$('ak-lbl').textContent='Typhoon API Key';$('ak').placeholder='typhoon-xxxxxxxx'}
   ck();
 };
+$('tscb').onchange=function(){updateCost()};
+$('sp').oninput=function(){updateCost()};
+$('ep').oninput=function(){updateCost()};
 $('bst').onclick=()=>{isCancelled=true;log('🛑 หยุด','error')};
 
 async function extractText(pageNum){try{var pg=await pdfDoc.getPage(pageNum),tc=await pg.getTextContent(),t='';tc.items.forEach(function(item){if(item.str)t+=item.str;if(item.hasEOL)t+='\n'});return t.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g,'').trim()}catch(e){return''}}
 function isBlankText(t){if(!t||t.length<5)return true;var c=t.replace(/[\s\d\.\,\-\u2014\u2013\(\)\/\\]/g,'');return c.length<3}
+/* Smart image embed: check if page has actual images/illustrations */
+async function hasPageImages(pageNum){try{var pg=await pdfDoc.getPage(pageNum),ops=await pg.getOperatorList();for(var i=0;i<ops.fnArray.length;i++){var fn=ops.fnArray[i];if(fn===pdfjsLib.OPS.paintImageXObject||fn===pdfjsLib.OPS.paintJpegXObject||fn===pdfjsLib.OPS.paintImageXObjectRepeat)return true}return false}catch(e){return false}}
 
 async function rp(n,tokenSaver){var d=tokenSaver?800:1600,fmt=tokenSaver?'image/jpeg':'image/png',q=tokenSaver?0.5:undefined;var pg=await pdfDoc.getPage(n),v=pg.getViewport({scale:1}),s=d/Math.max(v.width,v.height),vp=pg.getViewport({scale:s}),c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;var u=q?c.toDataURL(fmt,q):c.toDataURL(fmt);var mime=tokenSaver?'image/jpeg':'image/png';return{b:u.split(',')[1],w:Math.round(vp.width),h:Math.round(vp.height),mime:mime}}
 
@@ -583,7 +939,7 @@ async function ocrRetry(b,w,h,k,tokenSaver,mime){
 
 function cl(t,cw){let c=t.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F\uFFFE\uFFFF]/g,'');c=c.replace(/<\/?page_number[^>]*>/gi,'').replace(/<page_number>[^<]*<\/page_number>/gi,'').replace(/<[^>]*page_number[^>]*>[^<]*<\/[^>]*>/gi,'');c=c.replace(/\n\*\s*\d+\s*\n/g,'\n').replace(/\*\s*\d+\s*\*/g,'').replace(/\\'/g,'');if(cw)cw.split(',').map(w=>w.trim()).filter(Boolean).forEach(w=>{c=c.split(w).join('')});return c.replace(/\n\s*\n\s*\n/g,'\n\n').normalize('NFC').trim()}
 
-function dch(ss){const ch=[];const ps=[/^#{1,3}\s+(.+)/m,/^(บทที่\s*\d+[^\n]*)/m,/^(ตอนที่\s*\d+[^\n]*)/m,/^(Chapter\s+\d+[^\n]*)/im,/^(ภาค(?:ที่)?\s*\d+[^\n]*)/m,/^(Part\s+\d+[^\n]*)/im,/^(บทนำ|คำนำ|สารบัญ|อารัมภบท|บทส่งท้าย|บทสรุป|ภาคผนวก|คำอุทิศ|กิตติกรรมประกาศ)/m];ss.forEach((s,i)=>{for(const p of ps){const m=s.match(p);if(m){let t=m[1].replace(/^#+\s*/,'').trim();if(t.length>60)t=t.slice(0,60)+'…';if(!ch.some(x=>x.title===t))ch.push({title:t,pi:i});break}}});return ch}
+function dch(ss){const ch=[];const ps=[/^(บทที่\s*\d+[^\n]*)/m,/^(ตอนที่\s*\d+[^\n]*)/m,/^(Chapter\s+\d+[^\n]*)/im,/^(ภาค(?:ที่)?\s*\d+[^\n]*)/m,/^(Part\s+\d+[^\n]*)/im,/^(บทนำ|คำนำ|สารบัญ|อารัมภบท|บทส่งท้าย|บทสรุป|ภาคผนวก|คำอุทิศ|กิตติกรรมประกาศ)/m,/^#{1,3}\s+(.+)/m];ss.forEach((s,i)=>{if(!s||!s.trim())return;for(const p of ps){const m=s.match(p);if(m){let t=m[1].replace(/^#+\s*/,'').trim();if(t.length>60)t=t.slice(0,60)+'…';if(t.length<2)continue;if(!ch.some(x=>x.title===t&&Math.abs(x.pi-i)<3))ch.push({title:t,pi:i});break}}});return ch}
 
 function rtoc(){const l=$('tocl');l.innerHTML='';if(!chaps.length){$('tocsec').classList.remove('on');return}$('tocsec').classList.add('on');chaps.forEach((c,i)=>{const li=document.createElement('li');li.className='toci';li.innerHTML=`<span class="tn">${i+1}.</span><input value="${esc(c.title)}" data-i="${i}"><span class="tp">p.${c.pi+1}</span><span class="tx" data-i="${i}">✕</span>`;l.appendChild(li)});l.querySelectorAll('input').forEach(i=>i.onchange=()=>{chaps[+i.dataset.i].title=i.value});l.querySelectorAll('.tx').forEach(b=>b.onclick=()=>{chaps.splice(+b.dataset.i,1);rtoc()})}
 $('bac').onclick=()=>{const p=prompt('หน้าเริ่มบท:');if(!p)return;const n=+p;if(!n||n<1)return;const t=prompt('ชื่อบท:')||`บทที่ ${chaps.length+1}`;chaps.push({title:t,pi:n-1});chaps.sort((a,b)=>a.pi-b.pi);rtoc()};
@@ -592,10 +948,22 @@ async function mke(ss,ch){
   const z=new JSZip(),m={t:$('mt').value.trim()||pdfFile.name.replace(/\.pdf$/i,''),a:$('ma').value.trim()||'Unknown',p:$('mp').value.trim(),l:$('ml').value.trim()||'th',d:$('md').value.trim()},uid='bepub-'+Date.now();
   z.file('mimetype','application/epub+zip',{compression:'STORE'});
   z.file('META-INF/container.xml','<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>');
-  z.file('OEBPS/style.css',`@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap');body{font-family:'Sarabun',sans-serif;line-height:1.9;padding:1.2em;color:#1a1a1a;max-width:38em;margin:0 auto}h1{font-size:1.6em;margin:1.5em 0 .5em;font-weight:600}h2{font-size:1.3em;margin:1.3em 0 .4em}h3{font-size:1.1em;margin:1.1em 0 .3em}p{margin:.4em 0;text-indent:1.5em;text-align:justify}table{border-collapse:collapse;width:100%;margin:1em 0}td,th{border:1px solid #ddd;padding:.5em .7em}blockquote{border-left:3px solid #ccc;padding-left:1em;color:#555;margin:1em 0}img.cover{max-width:100%;display:block;margin:0 auto}`);
+  z.file('OEBPS/style.css',`@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap');body{font-family:'Sarabun',sans-serif;line-height:1.9;padding:1.2em;color:#1a1a1a;max-width:38em;margin:0 auto}h1{font-size:1.6em;margin:1.5em 0 .5em;font-weight:600}h2{font-size:1.3em;margin:1.3em 0 .4em}h3{font-size:1.1em;margin:1.1em 0 .3em}p{margin:.4em 0;text-indent:1.5em;text-align:justify}table{border-collapse:collapse;width:100%;margin:1em 0}td,th{border:1px solid #ddd;padding:.5em .7em}blockquote{border-left:3px solid #ccc;padding-left:1em;color:#555;margin:1em 0}img.cover{max-width:100%;display:block;margin:0 auto}img.page-img{max-width:100%;display:block;margin:1em auto;border:1px solid #eee;border-radius:4px}`);
   let mf='<item id="css" href="style.css" media-type="text/css"/>\n',sp='',nav='',po=1,pfm={};
   if(coverUrl){const ext=coverMime?.includes('png')?'png':'jpg',mt=coverMime||'image/jpeg';z.file(`OEBPS/cover.${ext}`,Uint8Array.from(atob(coverUrl.split(',')[1]),c=>c.charCodeAt(0)));mf+=`<item id="cover-img" href="cover.${ext}" media-type="${mt}"/>\n`;z.file('OEBPS/cover.xhtml',`<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><meta charset="UTF-8"/><link rel="stylesheet" href="style.css"/></head><body><div style="text-align:center"><img class="cover" src="cover.${ext}" alt="Cover"/></div></body></html>`);mf+=`<item id="cover" href="cover.xhtml" media-type="application/xhtml+xml"/>\n`;sp+=`<itemref idref="cover"/>\n`;nav+=`<navPoint id="cover" playOrder="${po++}"><navLabel><text>ปก</text></navLabel><content src="cover.xhtml"/></navPoint>\n`}
-  ss.forEach((s,i)=>{if(!s.trim())return;const fn=`p${i}.xhtml`;pfm[i]=fn;z.file(`OEBPS/${fn}`,`<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${ex(m.l)}"><head><meta charset="UTF-8"/><link rel="stylesheet" href="style.css"/></head><body>${m2h(s.trim())}</body></html>`);mf+=`<item id="p${i}" href="${fn}" media-type="application/xhtml+xml"/>\n`;sp+=`<itemref idref="p${i}"/>\n`});
+  ss.forEach((s,i)=>{if(!s.trim())return;const fn=`p${i}.xhtml`;pfm[i]=fn;
+    /* เช็คว่ามีรูปหน้านี้มั้ย */
+    var imgTag='';var pi=pageImgs&&pageImgs[i];
+    if(pi&&pi.b){
+      var ie=pi.m&&pi.m.includes('png')?'png':'jpg';
+      var imgFn=`img${i}.${ie}`;
+      z.file(`OEBPS/${imgFn}`,Uint8Array.from(atob(pi.b),c=>c.charCodeAt(0)));
+      mf+=`<item id="img${i}" href="${imgFn}" media-type="${pi.m||'image/jpeg'}"/>\n`;
+      imgTag=`<div style="text-align:center;margin-bottom:1em"><img class="page-img" src="${imgFn}" alt="Page ${i+1}"/></div>`;
+    }
+    z.file(`OEBPS/${fn}`,`<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${ex(m.l)}"><head><meta charset="UTF-8"/><link rel="stylesheet" href="style.css"/></head><body>${imgTag}${m2h(s.trim())}</body></html>`);
+    mf+=`<item id="p${i}" href="${fn}" media-type="application/xhtml+xml"/>\n`;sp+=`<itemref idref="p${i}"/>\n`
+  });
   if(ch.length)ch.forEach((c,i)=>{const fn=pfm[c.pi]||`p${c.pi}.xhtml`;nav+=`<navPoint id="ch${i}" playOrder="${po++}"><navLabel><text>${ex(c.title)}</text></navLabel><content src="${fn}"/></navPoint>\n`});
   else ss.forEach((s,i)=>{if(s.trim())nav+=`<navPoint id="n${i}" playOrder="${po++}"><navLabel><text>หน้า ${i+1}</text></navLabel><content src="p${i}.xhtml"/></navPoint>\n`});
   let mx=`<dc:title>${ex(m.t)}</dc:title><dc:language>${ex(m.l)}</dc:language><dc:identifier id="uid">${uid}</dc:identifier><dc:creator>${ex(m.a)}</dc:creator>`;
@@ -618,9 +986,10 @@ $('bres').onclick=function(){_resumeMode=true;startProcess().catch(function(e){l
 
 async function startProcess(){
   if(isProc)return;isProc=true;isCancelled=false;
+  if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
   try{
   var tokenSaver=$('tscb').checked;
-  var key=$('ak').value.trim(),origStart=Math.max(1,+$('sp').value||1),e0=+$('ep').value||0,tot=pdfDoc.numPages,end=(e0===0||e0>tot)?tot:e0,cw=$('cr').value;
+  var key=cleanKey($('ak').value),origStart=Math.max(1,+$('sp').value||1),e0=+$('ep').value||0,tot=pdfDoc.numPages,end=(e0===0||e0>tot)?tot:e0,cw=$('cr').value;
 
   if(!_resumeMode){
     /* ตรวจว่ามี saved progress ที่ตรง fileName มั้ย */
@@ -629,12 +998,13 @@ async function startProcess(){
       ocrS=saved.ocrS;stats=saved.stats;tokenUsage=saved.tokenUsage;lastStopPage=saved.lastStopPage;chaps=saved.chaps||[];
       _resumeMode=true;log('💾 โหลดงานค้าง: '+ocrS.filter(function(s){return s&&s.trim()}).length+' หน้า','success');
     }else{
-      ocrS=[];tokenUsage={prompt:0,completion:0,total:0};lastStopPage=0;stats={total:end-origStart+1,textExtract:0,ocrApi:0,skipped:0};clearProgress();
+      ocrS=[];pageImgs=[];tokenUsage={prompt:0,completion:0,total:0};lastStopPage=0;stats={total:end-origStart+1,textExtract:0,ocrApi:0,skipped:0};clearProgress();
     }
   }
 
   /* คำนวณ s0 หลังจาก load progress แล้ว */
   var s0=(_resumeMode&&lastStopPage>0)?lastStopPage:origStart;
+  if(_resumeMode&&stats.total===0)stats.total=end-origStart+1;
   if(s0>end){setSt('หน้าเริ่มต้น > สิ้นสุด','err');isProc=false;return}
 
   $('bgo').disabled=true;$('bst').disabled=false;$('bres').style.display='none';$('bres').disabled=true;
@@ -665,22 +1035,28 @@ async function startProcess(){
   }
 
   /* ฟังก์ชันประมวลผล 1 หน้า (ใช้ preCache ถ้ามี) */
+  var embedImgs=$('imgcb').checked;
   async function processPage(p){
-    var result={page:p,text:'',method:'',usage:null,skip:false,blank:false};
+    var result={page:p,text:'',method:'',usage:null,skip:false,blank:false,imgB64:null,imgMime:null};
+    /* Smart image embed: only embed if page actually has images */
+    var shouldEmbed=embedImgs?await hasPageImages(p):false;
     if(tokenSaver){
       var extracted=await extractText(p);
       var cleanExt=extracted.replace(/[\s\d\.\,\-\u2014\u2013\(\)\/\\]/g,'');
       if(cleanExt.length>=30){
         result.text=extracted;result.method='text';
+        if(shouldEmbed){var ei=preCache[p]||await rp(p,true);delete preCache[p];result.imgB64=ei.b;result.imgMime=ei.mime}
       }else if(extracted.length>0&&isBlankText(extracted)){
         result.skip=true;
       }else{
         var img=preCache[p]||await rp(p,true);delete preCache[p];
+        if(shouldEmbed){result.imgB64=img.b;result.imgMime=img.mime}
         var res=await ocrRetry(img.b,img.w,img.h,key,true,img.mime);
         result.text=cl(res.text,cw);result.method='ocr';result.usage=res.usage;
       }
     }else{
       var img2=preCache[p]||await rp(p,false);delete preCache[p];
+      if(shouldEmbed){result.imgB64=img2.b;result.imgMime=img2.mime}
       var res2=await ocrRetry(img2.b,img2.w,img2.h,key,false,img2.mime);
       result.text=cl(res2.text,cw);result.method='ocr';result.usage=res2.usage;
     }
@@ -727,19 +1103,19 @@ async function startProcess(){
       if(item.ok){
         var r=item.r;
         if(r.skip){
-          stats.skipped++;ocrS.push('');done++;consErr=0;
+          stats.skipped++;ocrS.push('');pageImgs.push(null);done++;consErr=0;
           log('⏭️ หน้า '+r.page+': ว่าง — ข้าม','purple');
         }else if(r.text){
           var t=r.method==='text'?cl(r.text,cw):r.text;
-          ocrS.push(t);full+=t+'\n\n--- Page Break ---\n\n';done++;consErr=0;
-          if(r.method==='text'){stats.textExtract++;log('✅ หน้า '+r.page+': Text ('+t.length+' chars) — ฟรี!','success')}
+          ocrS.push(t);pageImgs.push(r.imgB64?{b:r.imgB64,m:r.imgMime}:null);full+=t+'\n\n--- Page Break ---\n\n';done++;consErr=0;
+          if(r.method==='text'){stats.textExtract++;log('✅ หน้า '+r.page+': Text ('+t.length+' chars) — ฟรี!'+(r.imgB64?' 🖼️':''),'success')}
           else{stats.ocrApi++;
             if(r.usage){tokenUsage.prompt+=(r.usage.prompt_tokens||0);tokenUsage.completion+=(r.usage.completion_tokens||0);tokenUsage.total+=(r.usage.total_tokens||0)}
-            log('✅ หน้า '+r.page+': OCR ('+t.length+' chars'+(r.usage?', '+r.usage.total_tokens+' tok':'')+')','success');
+            log('✅ หน้า '+r.page+': OCR ('+t.length+' chars'+(r.usage?', '+r.usage.total_tokens+' tok':'')+')'+(r.imgB64?' 🖼️':''),'success');
           }
-        }else{ocrS.push('');done++;log('⚠️ หน้า '+r.page+': ว่าง','error')}
+        }else{ocrS.push('');pageImgs.push(null);done++;log('⚠️ หน้า '+r.page+': ว่าง','error')}
       }else{
-        ocrS.push('');done++;consErr++;
+        ocrS.push('');pageImgs.push(null);done++;consErr++;
         log('❌ หน้า '+item.page+': '+item.err.message,'error');
         if(item.err.fatal){
           fatalErr=item.err;lastStopPage=item.page+1;
@@ -777,11 +1153,13 @@ async function startProcess(){
     var msg='✅ สำเร็จ! '+goodPages+' หน้า'+tokStr;
     if(tokenSaver&&savedPct>0)msg+=' · 💎 ประหยัด '+savedPct+'%';
     setSt(msg,'ok');log('🎉 '+msg,'success');clearProgress();
+    sendNotif('Bepub ✅',msg);
   }else{
     var stopReason=isCancelled?'หยุดโดยผู้ใช้':fatalErr?(fatalErr.reason==='invalid_key'?'🔑 Key ไม่ถูกต้อง':fatalErr.reason==='quota_exceeded'?'💳 Token หมด':'🚫 Rate limit'):'Error '+consErr+' ครั้งติด';
     var msg2=stopReason+' — ได้ '+goodPages+'/'+stats.total+' หน้า'+tokStr+(hasContent?' (EPUB พร้อมดาวน์โหลด)':'');
     setSt(msg2,fatalErr&&fatalErr.reason==='invalid_key'?'err':'info');
     log(msg2,fatalErr?'error':'purple');
+    sendNotif('Bepub',msg2);
   }
 
   if(stopped&&lastStopPage>0&&lastStopPage<=end){
