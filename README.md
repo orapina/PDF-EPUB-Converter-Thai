@@ -2,6 +2,9 @@
 
 แปลง PDF เป็น EPUB ด้วย Typhoon OCR / Gemini Flash — รองรับภาษาไทย ทำงานในเบราว์เซอร์ ไม่ต้องติดตั้ง
 
+เข้าใช้ได้ที่: 
+# https://github.com/orapina/PDF-EPUB-Converter-Thai
+
 ![Client-Side](https://img.shields.io/badge/Client--Side-JavaScript-yellow)
 ![Thai OCR](https://img.shields.io/badge/Thai%20OCR-Typhoon-blue)
 ![Gemini](https://img.shields.io/badge/Gemini-Flash-orange)
